@@ -63,13 +63,7 @@ ui <-
         fluidRow(
             column(6, # kolonnebredde (6 er halv skjermbredde)
                    p(), br(),
-                   "Landflakene gir en kortfattet oversikt over Norges bistand til enkeltland.",
-                   p(),
-                   "Besøk også",
-                   tags$a(href = "https://resultater.norad.no/no",
-                          "bistandsresultater.no"),"for statistikk og resulater av norsk bistand",
-                   p(),
-                   "Ved spørsmål, ta kontakt med Statistikkseksjonen (post-stat@norad.no)",
+                   includeMarkdown("info.md"), # Tekstfil med info til brukere
                    p(), br(),
                    "Sist oppdatert: ", Sys.Date(),
                    p(), br(),
@@ -79,7 +73,19 @@ ui <-
     )
 
 # Innlogging med brukernavn og passord: wrapper ui i secure_app()
-ui <- secure_app(ui, theme = "cerulean")
+ui <- secure_app(ui,
+                 theme = "cerulean",
+                 set_labels(
+                   language = "en",
+                   "Please authenticate" = "Logg inn",
+                   "Username:" = "Brukernavn",
+                   "Password:" = "Passord"
+                 ),
+                 tags_bottom
+                 = 
+                     tags$img(
+                       src = "norad_logo_black_small_rgb.png", width = "90px")
+                 )
 
 # Spesifiserer backend ----
 server <- function(input, output) {
@@ -87,8 +93,8 @@ server <- function(input, output) {
     # Passordbeskyttelse: Sjekker credentials for å godkjenne innlogging
     res_auth <- secure_server(
         check_credentials = check_credentials(data.frame(
-            user = c("norad", "norad123", "landflak"),
-            password = c("norad", "norad123", "landflak"),
+            user = c("norad", "landflak123", "landflak"),
+            password = c("norad", "landflak123", "landflak321"),
             stringsAsFactors = FALSE))
     )
     
