@@ -68,7 +68,7 @@ ui <-
                    p(), br(),
                    "Sist oppdatert: ", Sys.Date(),
                    p(), br(),
-                   img(src = "norad_logo_black_small_rgb.png", width = "100px")
+                   img(src = "norad_logo_black_small_rgb_micro.png")
             )
         )
     )
@@ -87,7 +87,7 @@ ui <- secure_app(ui,
                           tags$a(
                             href = "mailto:post-stat@norad.no",
                             target="_top", "post-stat@norad.no")),
-                   tags$img(src = "norad_logo_black_small_rgb.png", width = "90px")
+                   tags$img(src = "norad_logo_black_small_rgb_micro.png")
                    )
                  )
 
