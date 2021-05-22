@@ -79,12 +79,14 @@ ui <- secure_app(ui,
                    language = "en",
                    "Please authenticate" = "Logg inn",
                    "Username:" = "Brukernavn",
-                   "Password:" = "Passord"
-                 ),
-                 tags_bottom
-                 = 
-                     tags$img(
-                       src = "norad_logo_black_small_rgb.png", width = "90px")
+                   "Password:" = "Passord"),
+                 tags_bottom = tags$div(
+                   tags$p("Ved spørsmål om innlogging, kontakt ",
+                          tags$a(
+                            href = "mailto:post-stat@norad.no",
+                            target="_top", "post-stat@norad.no")),
+                   tags$img(src = "norad_logo_black_small_rgb.png", width = "90px")
+                   )
                  )
 
 # Spesifiserer backend ----
