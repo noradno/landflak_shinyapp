@@ -77,7 +77,8 @@ ui <- secure_app(ui,
                  theme = "cerulean",
                  set_labels(
                    language = "en",
-                   "Please authenticate" = "Logg inn",
+                   "Login" = "Logg inn",
+                   "Please authenticate" = "Vennligst logg inn",
                    "Username:" = "Brukernavn",
                    "Password:" = "Passord"),
                  tags_bottom = tags$div(
