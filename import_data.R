@@ -6,6 +6,8 @@ library(vroom)
 library(dplyr)
 library(readxl)
 library(janitor)
+library(noradstats)
+
 
 # Kilde A: Bistandsstatistikk 10 år (statsys-data)
 #noradstats::download_aiddata("statsys_10yr.csv", subdir = TRUE)

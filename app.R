@@ -1,9 +1,10 @@
+# Shiny web app for å generere og laste ned parametriserte landflak i wordformat ----
+# Skrevet av Einar Tornes
+# Appen er publisert publisert på shinyapps.io med innlogging: https://noradstats.shinyapps.io/landflak/
 
-# Shiny web app som genererer parametrisert landrapport i word-format
-# Appen kjører landflak.Rmd basert på brukervalgt land (parametrisert)
-# Oppdateringer: Legg inn eventuelle oppdaterte datafiler i mappen data/ før opplasting til shinyapps.io
-# Obs: Pakken noradstats må reinstalleres før hver opplasting til shinyapps.io: devtools::install_github("einartornes/noradstats")
-# Koden er basert på følgende oppskrift: https://shiny.rstudio.com/articles/generating-reports.html
+# Appens server kjører scriptet landflak.Rmd når bruker har valgt landparameter på nettsiden (ui)
+# Datagrunnalg: Datafiler legges i mappen data/ før opplasting til shinyapps.io. Data lastes inn i app.r med scriptet import_data.R
+# Pakken noradstats må reinstalleres ved ny last til shinyapps.io: devtools::install_github("einartornes/noradstats")
 
 # Laster inn pakker ----
 library(shiny)
@@ -13,7 +14,7 @@ library(shinythemes)
 library(vroom)
 library(dplyr)
 
-# Laster inn data ved å source scriptet import_data.R
+# Laster inn data i global environment ved å source scriptet import_data.R
 source("import_data.R")
 
 # Landliste til ui: bruker-input (land-parameter) ----
@@ -60,7 +61,7 @@ ui <-
             column(12
                    , # kolonnebredde (6 er halv skjermbredde)
                    p(), br(),
-                   includeMarkdown("info.md"), # Tekstfil med info til brukere
+                   includeMarkdown("ui_tekst.md"), # Tekstfil med info til brukere
                    p(), br(),
                    "Sist oppdatert: ", Sys.Date(),
                    p(), br(),
@@ -120,4 +121,5 @@ server <- function(input, output) {
     )
 }
 
+# Bygg app
 shinyApp(ui, server)
