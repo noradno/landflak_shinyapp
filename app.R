@@ -13,26 +13,22 @@ library(shinythemes)
 library(vroom)
 library(dplyr)
 
-# Landliste til bruker-input (land-parameter) ----
-select_country <- 
-    vroom(file = "data/statsys_10yr.csv",
-          delim = ";",
-          num_threads = 1, # Hindrer at spesialtegn lager nye rader
-          .name_repair = janitor::make_clean_names,
-          col_select = c(
-              type_of_flow, type_of_agreement, income_category,
-              year, recipient_country_no, disbursed_nok)) |>
+# Laster inn data ved å source scriptet import_data.R
+source("import_data.R")
+
+# Landliste til ui: bruker-input (land-parameter) ----
+select_country <- df_statsys %>%
   filter(type_of_flow == "ODA") |>
   filter(type_of_agreement != "Rammeavtale") |>
   filter(income_category != "Unspecified") |>
   filter(year == max(year)) |>
   group_by(recipient_country_no) |>
-  summarise(total = sum(disbursed_nok)) |>
+  summarise(total = sum(disbursed_mill_nok)) |>
   filter(total > 0) |>
   select(recipient_country_no) |>
   arrange() |>
   pull()
-
+  
 # Shiny app ----
 
 # Spesifiserer frontend ----

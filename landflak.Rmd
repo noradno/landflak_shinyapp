@@ -44,7 +44,7 @@ library(gridExtra)
 library(noradstats)
 ```
 
-```{r data-import}
+```{r data-import, eval=FALSE}
 # Laster inn data ----
 
 # Kilde A: Bistandsstatistikk 10 år (statsys-data)
