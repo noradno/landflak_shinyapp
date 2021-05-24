@@ -1,4 +1,4 @@
-# Shiny web app for å laste ned landflak om norsk bistand til mottakerland
+# Shiny web app for å laste ned landflak om norsk bistand til enkeltland
 
 ### Funksjonalitet
 
