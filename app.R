@@ -17,19 +17,19 @@ library(dplyr)
 # Laster inn data i global environment ved å source scriptet import_data.R
 source("import_data.R")
 
-# Landliste til ui: bruker-input (land-parameter) ----
-select_country <- df_statsys %>%
+select_country <- df_statsys |>
   filter(type_of_flow == "ODA") |>
   filter(type_of_agreement != "Rammeavtale") |>
   filter(income_category != "Unspecified") |>
   filter(year == max(year)) |>
-  group_by(recipient_country_no) |>
+  group_by(recipient_country_no_visual) |>
   summarise(total = sum(disbursed_mill_nok)) |>
   filter(total > 0) |>
-  select(recipient_country_no) |>
+  select(recipient_country_no_visual) |>
   arrange() |>
   pull()
-  
+
+
 # Shiny app ----
 
 # Spesifiserer frontend ----

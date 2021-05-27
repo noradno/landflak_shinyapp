@@ -1,4 +1,5 @@
-# Scriptet laster inn datakilder som brukes i appen. Scriptet sources inn i appen.
+# Scriptet laster inn datakilder som brukes i appen og inkluderer visuell mottakerland-kolonne i alle datafiler.
+# Scriptet sources inn i scriptet app.R
 # Datakildene lastes inn fra mappen data/
 
 # Laster inn nødvendige pakker
@@ -51,3 +52,21 @@ df_dac_raw <- read_excel(path = "data/oecd_dac_donors.xlsx", sheet = 1) |>
 # Kilde E. visuelle landnavn på bistandsresultater.no (statsys-uttrekket land_og_regioner)
 df_landreg_raw <- read_excel(path = "data/land_og_regioner.xlsx") |>
   janitor::clean_names()
+
+
+# Visudell landkolonne i alle datakilder ----------------------------------
+# Kolonnen hentes fra df_landreg_raw
+
+df_landreg_raw <- df_landreg_raw %>%
+  select(navn_no, land_norsk) %>%
+  rename("recipient_country_no_visual" = land_norsk)
+
+df_statsys <- left_join(x = df_statsys, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
+
+df_dac_raw <- left_join(x = df_dac_raw, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
+
+df_imp_raw <- left_join(x = df_imp_raw, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
+
+df_imp_org_raw <- left_join(x = df_imp_org_raw, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
+
+rm(df_landreg_raw)

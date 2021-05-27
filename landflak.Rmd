@@ -53,7 +53,7 @@ source("import_data.R")
 
 # Datasett filtrert på land og valgte variabler
 df_dac <- df_dac_raw |>
-  filter(statsys_recipient_no == params$land) |>
+  filter(recipient_country_no_visual == params$land) |>
   filter(year == max(year)) |>
   select(oecd_donor_no, usd_mill, year) |>
   arrange(desc(usd_mill))
@@ -156,7 +156,7 @@ plot_dac
 
 # Datasett på total øremerket bistand. Spesifiserer kolonne "Type bistand"
 df_earmarked <- df_statsys |>
-  filter(recipient_country_no == params$land,
+  filter(recipient_country_no_visual == params$land,
          type_of_flow == "ODA",
          year >= max(year)-9,
          type_of_agreement != "Rammeavtale") |>                 
@@ -181,7 +181,7 @@ for(i in seq_along(vec_all_years)) {
 
 # Dataasett på total imputed multilateral. Spesifiserer kolonne "Type bistand"
 df_imp <- df_imp_raw |>
-  filter(recipient_country_no == params$land,
+  filter(recipient_country_no_visual == params$land,
          year %in% df_earmarked$year) |>
   rename(mill_nok = disbursed_mill_nok) |>
   select(year, mill_nok) |>
@@ -306,11 +306,8 @@ rm(title.grob)
 # Link til landsiden i resultatportalen ----
 # Landsiden i resultatportalen bruker visuelle land- og regionavn.
 
-# url-landnavn: visuelt landnavn fra datakilde df_landreg_raw
-vec_url_land <- df_landreg_raw |>
-  filter(navn_no == params$land) |>
-  select(land_norsk) |>
-  pull() |>
+# url-landnavn
+vec_url_land <- params$land |>
   str_to_lower() |>
   str_replace_all(" ", "-") |>
   str_replace_all("[.]", "") |>
@@ -319,10 +316,11 @@ vec_url_land <- df_landreg_raw |>
   str_replace_all("ø", "oe") |>
   str_replace_all("å", "aa")
 
-# url-regionnavn: visuelt landnavn fra datakilde df_landreg_raw
-vec_url_region <- df_landreg_raw |>
-  filter(navn_no == params$land) |>
-  select(region_norsk) |>
+# url-regionnavn
+vec_url_region <- df_statsys |>
+  filter(recipient_country_no_visual == params$land) |>
+  select(main_region_no) |>
+  unique() |>
   pull() |>
   str_to_lower() |>
   str_replace_all("æ", "ae") |>
@@ -362,7 +360,7 @@ rm(df_total_plot_label)
 ```{r tema}
 # Datasett på øremerket bistand fordelt på tema. Inkluderer prosentkolonne
 df_tema <- df_statsys |>
-  filter(recipient_country_no == params$land,
+  filter(recipient_country_no_visual == params$land,
          type_of_flow == "ODA",
          type_of_agreement != "Rammeavtale",
          year == max(year)) |>                 
@@ -475,7 +473,7 @@ grid.draw(plot_tema) # Dette er måten å tegne grid.plot
 ```{r partnertype}
 # Datasett på øremerket bistand fordelt på partnertype. Inkluderer prosentkolonne
 df_partnertype <- df_statsys |>
-  filter(recipient_country_no == params$land,
+  filter(recipient_country_no_visual == params$land,
          type_of_flow == "ODA",
          type_of_agreement != "Rammeavtale",
          year == max(year)) |>
@@ -590,7 +588,7 @@ grid.draw(plot_partnertype) # Dette er måten å tegne grid.plot
 ```{r partnerdata}
 # Datasett på øremerket bistand fordelt på enkeltpartner
 df_partner <- df_statsys|>
-  filter(recipient_country_no == params$land, # Definerer land med parameter
+  filter(recipient_country_no_visual == params$land, # Definerer land med parameter
          type_of_flow == "ODA",
          type_of_agreement != "Rammeavtale",
          year == max(year)) |> 
@@ -691,7 +689,7 @@ vec_imp_org_maxyear <- max(df_imp_org_raw$year)
 
 # Datasett på beregnet multilateral bistand per organisasjon
 df_imp_org <- df_imp_org_raw |>
-  filter(recipient_country_no == params$land) |>
+  filter(recipient_country_no_visual == params$land) |>
   select(multilateral_organisasjon, disbursed_mill_nok) |>
   rename("Avtalepartner" = multilateral_organisasjon,
          "mill_nok" = disbursed_mill_nok) |>
