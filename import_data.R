@@ -3,20 +3,16 @@
 # Datakildene lastes inn fra mappen data/
 
 # Laster inn nødvendige pakker
-library(vroom)
 library(dplyr)
 library(readxl)
 library(janitor)
 library(noradstats)
 
 
-# Kilde A: Bistandsstatistikk 10 år (statsys-data)
-#noradstats::download_aiddata("statsys_10yr.csv", subdir = TRUE)
-df_statsys <- 
-  vroom(file = "data/statsys_10yr.csv",
-        delim = ";",
-        col_types = cols(`SDG description` = col_character()),
-        num_threads = 1) |>
+# Kilde A: Bistandsstatistikk 10 år (oda_ten)
+df_oda_ten <- 
+  noradstats::read_aiddata("oda_ten.csv", subdir = TRUE) |>
+  
   # Velger variabler, grupperer og summerer
   group_by(`Recipient country NO`,
            Year,
@@ -35,7 +31,6 @@ df_statsys <-
   
   # Rydder kolonnenavn
   janitor::clean_names()
-
 
 # Kilde B. Imputed multilteral 10 år (kilde: OECDs imputed-data på https://stats.oecd.org/)
 df_imp_raw <- read_excel(path = "data/imputed_multi_land.xlsx", sheet = 1) |>
@@ -61,7 +56,7 @@ df_landreg_raw <- df_landreg_raw %>%
   select(navn_no, land_norsk) %>%
   rename("recipient_country_no_visual" = land_norsk)
 
-df_statsys <- left_join(x = df_statsys, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
+df_oda_ten <- left_join(x = df_oda_ten, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
 
 df_dac_raw <- left_join(x = df_dac_raw, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
 

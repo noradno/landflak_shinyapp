@@ -3,7 +3,7 @@
 # Appen er publisert publisert på shinyapps.io med innlogging: https://noradstats.shinyapps.io/landflak/
 
 # Appens server kjører scriptet landflak.Rmd når bruker har valgt landparameter på nettsiden (ui)
-# Datagrunnalg: Datafiler legges i mappen data/ før opplasting til shinyapps.io. Data lastes inn i app.r med scriptet import_data.R
+# Datagrunnlag: Scriptet sourcer to script (get_data.R og import_data.R) som laster ned og laster inn datagrunnlag.
 # Pakken noradstats må reinstalleres ved ny last til shinyapps.io: devtools::install_github("einartornes/noradstats")
 
 # Laster inn pakker ----
@@ -11,13 +11,15 @@ library(shiny)
 library(shinybusy)
 library(shinymanager)
 library(shinythemes)
-library(vroom)
 library(dplyr)
+
+# Laster ned datakilder fra noradstats google drive til subfolder .data/
+source("get_data.R")
 
 # Laster inn data i global environment ved å source scriptet import_data.R
 source("import_data.R")
 
-select_country <- df_statsys |>
+select_country <- df_oda_ten |>
   filter(type_of_flow == "ODA") |>
   filter(type_of_agreement != "Rammeavtale") |>
   filter(income_category != "Unspecified") |>

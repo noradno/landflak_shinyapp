@@ -14,9 +14,9 @@ Appen er publisert som en nettside på følgende URL: <https://noradstats.shinya
 
 ### Rutine ved oppdatering
 
--   Det er kun datakildene som trengs å oppdateres, og øvrige filer i appen kan være uendret. Legg inn nye datafiler i *data*/-mappen og slett gamle datafiler. Vær oppmerksom på riktige filnavn og variabelnavn.
+-   Det er kun datakildene på noradstats google drive som trengs å oppdateres. Alle filer i appen skal være uendret, og laster automatisk ned oppdaterte datafiler fra *noradstats google drive*. Legg derfor inn oppdaterte datafiler i *noradstats google drive*, og vær oppmerksom på å bruke riktige filnavn og variabelnavn.
 -   Oppdater alle pakker før opplasting til *shinyapps.io*. Viktig å reinnstallere pakken noradstats via *devtools::install_github("einartornes/noradstats")*. Det skyldes at noradstats har dependencies til en rekke andre pakker, og gir feilmelding uten reinnstallasjon.
--   Appen publiseres via Rstudio til *shinyapps.io* på følgende URL: <https://noradstats.shinyapps.io/landflak/>
+-   Appen publiseres til *shinyapps.io* gjennom Rstudios *Publish the application or document* til følgende URL: <https://noradstats.shinyapps.io/landflak/>
 
 ### Beskrivelse av filer
 
@@ -27,15 +27,17 @@ Appen er publisert som en nettside på følgende URL: <https://noradstats.shinya
     -   ui (front-end): spesifiserer nettsiden inkl. brukerinput fra landliste (parameter) og action-button (*Generer landflak i Microsoft Word-format*).
     -   server (back-end): kjører scriptet *landflak.Rmd* for valgte land (parameter) når bruker trykker action-button, og laster ned filen.
 
+-   *get_data.R:* Script for å laste ned data fra *noradstats google drive*. Scriptet sources (kjøres) i scriptet *app.R. Scriptet laster ned dataene ved bruk av* R-pakken *noradstats, tilgjengelig på Github:* devtools::install_github("einartornes/noradstats")
+
 -   *import_data.R*: Script for å laste inn data fra mappen *data/*. Scriptet sources (kjøres) i scriptet *app.R*. Scriptet inkluderer også landnavn-kolonnen *recipient_country_no_visual* i alle datafilene, som er de visuelle landnavnene tilsvarende i bistandsresultater.no
 
--   *landflak.Rmd*: Scriptet lager landflaket. Det er en parametrisert rapport i word-format med ett brukervalgt parameter: mottakerland. Scriptet kjøres i server-spesifiseringen i scriptet *app.R*, når bruker har valgt land og trykker på action button.
+-   *landflak.Rmd*: Scriptet genererer landflaket. Det er en parametrisert rapport i word-format med ett brukervalgt parameter: mottakerland. Scriptet kjøres i server-spesifiseringen i scriptet *app.R*, når bruker har valgt land og trykker på action button "Generer landflak i Microsoft Word-format" i appen.
 
 #### Datafiler
 
--   *data/* (mappe): inneholder følgende datafiler, som dekker ulike tidsrom.
+-   Datafiler legges inn i *noradstats google drive* (logg inn via gmail). Datafilene dekker ulike tidsrom og er basert på ulike datakilder.
 
-    -   *statsys_10yr.csv*: Norsk bistandsstatistikk siste ti år i csv-format. Kilde: pakken noradstats devtools::install_github("einartornes/noradstats")
+    -   *oda_ten.csv*: Norsk bistandsstatistikk siste ti år i csv-format. Kilde: Norsk bistandsstatistikk (statsys-ttrekk) siste ti år, ekskludert kolonnen *Programme officer,* og er filtrert til å inneholde kun *Type of flow = ODA*.
     -   *oecd_dac_donors.xlsx*: Øremerket bistand fra medlemsland i OECD DAC siste rapporteringsår, avgrenset til enkeltland som har mottatt øremerket bistand fra Norge. Kilde: OECDs statistikkdatabase (*CRS*).
     -   *imputed_multi_land.xlsx*: Beregnet norsk multilateral kjernestøtte til mottakerland siste ti år, avgrenset til land som har mottatt øremerket bistand fra Norge de ti aktuelle årene Kilde: OECDs statistikkdatabase (*DAC2a*).
     -   *imputed_multil_land_org.xlsx*: Beregnet norsk multilateral kjernestøtte til mottakerland per organisasjon siste år, avgrenset til land som har mottatt øremerket bistand fra Norge det aktuelle året . Kilde: Tilsendes fra OECD DCD over epost.

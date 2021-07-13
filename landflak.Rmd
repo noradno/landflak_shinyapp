@@ -155,7 +155,7 @@ plot_dac
 # Total norsk bistand ----
 
 # Datasett på total øremerket bistand. Spesifiserer kolonne "Type bistand"
-df_earmarked <- df_statsys |>
+df_earmarked <- df_oda_ten |>
   filter(recipient_country_no_visual == params$land,
          type_of_flow == "ODA",
          year >= max(year)-9,
@@ -167,7 +167,7 @@ df_earmarked <- df_statsys |>
 
 # Passer på at år uten data i tiårsperioden også inkluderes
 # For-loop: Legger til rad for hvert år uten bistand og sorterer etter år
-vec_all_years <- min(unique(df_statsys$year)):max(unique(df_statsys$year))
+vec_all_years <- min(unique(df_oda_ten$year)):max(unique(df_oda_ten$year))
 
 for(i in seq_along(vec_all_years)) {
   if (!vec_all_years[i] %in% df_earmarked$year) {
@@ -317,7 +317,7 @@ vec_url_land <- params$land |>
   str_replace_all("å", "aa")
 
 # url-regionnavn
-vec_url_region <- df_statsys |>
+vec_url_region <- df_oda_ten |>
   filter(recipient_country_no_visual == params$land) |>
   select(main_region_no) |>
   unique() |>
@@ -359,7 +359,7 @@ rm(df_total_plot_label)
 
 ```{r tema}
 # Datasett på øremerket bistand fordelt på tema. Inkluderer prosentkolonne
-df_tema <- df_statsys |>
+df_tema <- df_oda_ten |>
   filter(recipient_country_no_visual == params$land,
          type_of_flow == "ODA",
          type_of_agreement != "Rammeavtale",
@@ -472,7 +472,7 @@ grid.draw(plot_tema) # Dette er måten å tegne grid.plot
 
 ```{r partnertype}
 # Datasett på øremerket bistand fordelt på partnertype. Inkluderer prosentkolonne
-df_partnertype <- df_statsys |>
+df_partnertype <- df_oda_ten |>
   filter(recipient_country_no_visual == params$land,
          type_of_flow == "ODA",
          type_of_agreement != "Rammeavtale",
@@ -587,7 +587,7 @@ grid.draw(plot_partnertype) # Dette er måten å tegne grid.plot
 
 ```{r partnerdata}
 # Datasett på øremerket bistand fordelt på enkeltpartner
-df_partner <- df_statsys|>
+df_partner <- df_oda_ten|>
   filter(recipient_country_no_visual == params$land, # Definerer land med parameter
          type_of_flow == "ODA",
          type_of_agreement != "Rammeavtale",
@@ -644,7 +644,7 @@ table_df_partner <- df_partner |>
   autofit(add_w = 0, add_h = 0) |> # Bruker autofit på høyde og bredde
   height_all(0.25, part = "all") |> # Justerer radhøyde
   hrule(rule = "exact", part = "all") |> #Justerer radhøyde
-  set_caption(caption = paste0("Avtalepartnere, øremerket bistand til ", params$land, " i ", max(df_statsys$year))) |>
+  set_caption(caption = paste0("Avtalepartnere, øremerket bistand til ", params$land, " i ", max(df_oda_ten$year))) |>
   font(fontname = "Cambria", part = "all") |>
   fontsize(size = 11, part = "all") |>
   bg(bg = "#eff4f4", part = "body", i = seq(1, nrow(df_partner)-1)) |>
