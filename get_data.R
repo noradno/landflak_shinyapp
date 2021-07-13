@@ -1,5 +1,11 @@
 # Download data files from noradstats google drive and stre in subfolder ./data
 
+# Get noradstats-package from github using devtools:install_github(einartornes/noradstats")
+
+#install.packages("devtools")
+#library(devtools)
+
+#install_github("einartornes/noradstats")
 library(noradstats)
 
 #noradstats::find_aiddata()

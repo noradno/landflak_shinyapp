@@ -1,6 +1,6 @@
 # Shiny web app for å generere og laste ned parametriserte landflak i wordformat ----
 # Skrevet av Einar Tornes
-# Appen er publisert publisert på shinyapps.io med innlogging: https://noradstats.shinyapps.io/landflak/
+# Appen publseres via Rstudio desktop eller Rstudio Cloaud til shinyapps.io-serveren: https://noradstats.shinyapps.io/landflak/
 
 # Appens server kjører scriptet landflak.Rmd når bruker har valgt landparameter på nettsiden (ui)
 # Datagrunnlag: Scriptet sourcer to script (get_data.R og import_data.R) som laster ned og laster inn datagrunnlag.

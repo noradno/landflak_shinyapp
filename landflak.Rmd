@@ -7,7 +7,7 @@ output:
 params:
   land: "Afghanistan" 
 ---
-<!-- Scriptet forutsetter at data allerede er lastet inn i app.r. Velg eval=TRUE i chunk dataimport for at scriptet skal fungere separat -->
+<!-- Scriptet forutsetter at scriptet kjøres via scriptet app.r. Velg eval=TRUE i chunk dataimport for at scriptet skal fungere separat -->
 
 <!-- Scriptet fungerer for alle land som mottok bistand siste år. -->
 
