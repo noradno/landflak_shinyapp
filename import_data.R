@@ -1,5 +1,5 @@
 # Scriptet laster inn datakilder som brukes i appen og inkluderer visuell mottakerland-kolonne i alle datafiler.
-# Scriptet sources inn i scriptet app.R
+# Scriptet sources inn i scriptet app.R, og trenger dermed ikke å kjøres separat
 # Datakildene lastes inn fra mappen data/
 
 # Laster inn nødvendige pakker
