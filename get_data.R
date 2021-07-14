@@ -1,22 +1,33 @@
 # Scriptet laster ned datakilder som brukes i appen fra noradstats google drive
 # Scriptet sources inn i scriptet app.R, og trenger dermed ikke å kjøres separat
-# Datakildene ned til undermappen ./data
+# Datakildene lastes ned til undermappen ./data
 
-# Laster inn nødvendige pakker
-# Henter pakken noradstats fra github med devtools::install_github("einartornes/noradstats")
+# Loading packages
+library(googledrive)
+library(purrr)
 
-#install.packages("devtools")
-#library(devtools)
+# Connecting to noradstats google drive
+googledrive::drive_auth(email = "noradstats@gmail.com")
 
-#install_github("einartornes/noradstats")
-library(noradstats)
+# Find available files
+googledrive::drive_find()
 
-#noradstats::find_aiddata()
+# Selecting files to download
+files <- c("oda_ten.csv",
+           "oecd_dac_donors.xlsx",
+           "land_og_regioner.xlsx",
+           "imputed_multi_land_org.xlsx",
+           "imputed_multi_land.xlsx")
 
-# Download data files using funtion noradstats::download_aiddata
+# Filepath til undermappe ./data
+paths <- paste0("data/", files)
 
-noradstats::download_aiddata("oda_ten.csv", subdir = TRUE)
-noradstats::download_aiddata("oecd_dac_donors.xlsx", subdir = TRUE)
-noradstats::download_aiddata("land_og_regioner.xlsx", subdir = TRUE)
-noradstats::download_aiddata("imputed_multi_land_org.xlsx", subdir = TRUE)
-noradstats::download_aiddata("imputed_multi_land.xlsx", subdir = TRUE)
+# Create ./data-folder if not present.
+if(file.exists("./data") == FALSE) {
+  dir.create(file.path("./data"))
+}
+
+# Download selected files to subfolder ./data (using purrr::map2)
+map2(.x = files, .y = paths, ~ googledrive::drive_download(file = .x,
+                                                           path = .y,
+                                                           overwrite = TRUE))
