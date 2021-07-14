@@ -27,7 +27,7 @@ Appen er publisert som en nettside på følgende URL: <https://noradstats.shinya
     -   ui (front-end): spesifiserer nettsiden inkl. brukerinput fra landliste (parameter) og action-button (*Generer landflak i Microsoft Word-format*).
     -   server (back-end): kjører scriptet *landflak.Rmd* for valgte land (parameter) når bruker trykker action-button, og laster ned filen.
 
--   *get_data.R:* Script for å laste ned data fra *noradstats google drive*. Scriptet sources (kjøres) i scriptet *app.R. Scriptet laster ned dataene ved bruk av* R-pakken *noradstats, tilgjengelig på Github:* devtools::install_github("einartornes/noradstats")
+-   *get_data.R:* Script for å laste ned data fra *noradstats google drive*. Scriptet sources (kjøres) i scriptet *app.R. Scriptet laster ned dataene ved bruk av* R-pakken googledrive.
 
 -   *import_data.R*: Script for å laste inn data fra mappen *data/*. Scriptet sources (kjøres) i scriptet *app.R*. Scriptet inkluderer også landnavn-kolonnen *recipient_country_no_visual* i alle datafilene, som er de visuelle landnavnene tilsvarende i bistandsresultater.no
 
