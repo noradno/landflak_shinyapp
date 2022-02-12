@@ -11,7 +11,7 @@ library(noradstats)
 
 # Kilde A: Bistandsstatistikk 10 år (oda_ten)
 df_oda_ten <- 
-  noradstats::read_aiddata("oda_ten.csv", subdir = TRUE) |>
+  noradstats::read_aiddata("data/oda_ten.csv") |>
   
   # Velger variabler, grupperer og summerer
   group_by(`Recipient country NO`,

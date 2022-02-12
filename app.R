@@ -60,8 +60,7 @@ ui <-
         
         # Tekstomtale
         fluidRow(
-            column(12
-                   , # kolonnebredde (6 er halv skjermbredde)
+            column(12, # kolonnebredde (6 er halv skjermbredde)
                    p(), br(),
                    includeMarkdown("ui_tekst.md"), # Tekstfil med info til brukere
                    p(), br(),
