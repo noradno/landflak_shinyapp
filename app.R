@@ -67,8 +67,6 @@ ui <-
                    p(), br(),
                    includeMarkdown("ui_tekst.md"), # Tekstfil med info til brukere
                    p(), br(),
-                   "Sist oppdatert: ", Sys.Date(),
-                   p(), br(),
                    img(src = "norad_logo_black_small_rgb_micro.png")
             )
         )
@@ -86,8 +84,8 @@ ui <- secure_app(ui,
                  tags_bottom = tags$div(
                    tags$p("Ved spørsmål om innlogging, kontakt ",
                           tags$a(
-                            href = "mailto:post-stat@norad.no",
-                            target="_top", "post-stat@norad.no")),
+                            href = "mailto:statistikk@norad.no",
+                            target="_top", "statistikk@norad.no")),
                    tags$img(src = "norad_logo_black_small_rgb_micro.png")
                    )
                  )
