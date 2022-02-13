@@ -1,22 +1,31 @@
-# Shiny web app for å laste ned landflak om norsk bistand til enkeltland
+# Landflakportal - en Shiny web app for nedlastning av landflak om norsk bistand til enkeltland
 
 ### Funksjonalitet
 
-En Shiny web app som genererer og laster ned parametriserte rapporter i word-format basert på brukervalgt mottakerland.
+-   En Shiny web app som genererer og laster ned parametriserte rapporter i word-format basert på brukervalgt mottakerland. Appen viser både øremerket bistand til enkeltland g beregnet multilateral kjernestøtte til enkeltland. Appen har dermed mer info enn hva som inngår i norsk offisiell bistandsstatistikk, og skal presentere bistanden i et kort flak.
+-   Appen er for internt bruk og krever derfor brukernavn og passord.
+-   Landflakene sammenstiller offisiell statistikk på øremerket bistand til enkeltland, fra Norge og andre medlemsland i OECDs utviklingskomite (DAC). I tillegg presenteres offisielle beregninger fra OECD på hvor mye av Norges multilaterale kjernestøtte som brukes på mottakerlandet. Landflakene dekker en tiårsperiode.
+-   Bruker kan velge blant alle land som mottok øreemerket bistand ved forrige rapporteringsår.
+-   Appen bygges med scriptet *app.R*, som spesifiserer både ui (front-end) og server (back-end).
+-   Appen er publisert som en nettside på følgende URL: <https://noradstats.shinyapps.io/landflak/>. I tillegg er test-portal på følgende URL: <https://noradstats.shinyapps.io/landflak_test/>.
 
-Landflakene sammenstiller offisiell statistikk på øremerket bistand til enkeltland, fra Norge og andre medlemsland i OECDs utviklingskomite (DAC). I tillegg presenteres offisielle beregninger fra OECD på hvor mye av Norges multilaterale kjernestøtte som brukes på mottakerlandet. Landflakene dekker en tiårsperiode.
+### Rutine ved oppdatering av datakilder
 
-Bruker kan velge blant alle land som mottok øreemerket bistand ved forrige rapporteringsår.
+-   Det er kun datakildene på noradstats google drive som trengs å oppdateres. Legg derfor inn oppdaterte datafiler i *noradstats google drive*, og vær oppmerksom på å bruke like filnavn og variabelnavn som forrige filversjoner. Slett gamle filer, slik at det ikke er flere filer med samme navn. Ingen scripts eller andre filer skal endres når datakildene oppdateres.
 
-Appen bygges med scriptet *app.R*, som spesifiserer både ui (front-end) og server (back-end).
+-   Kjør scriptet *get_data.R* for å laste ned datakilder fra *noradstats google drive*.
 
-Appen er publisert som en nettside på følgende URL: <https://noradstats.shinyapps.io/landflak/>
+-   Oppdater alle pakker og R-versjonen før opplasting til *shinyapps.io*. Viktig å av- og reinnstallere pakken noradstats via *devtools::install_github("einartornes/noradstats")*. Det skyldes at noradstats har dependencies til en rekke andre pakker, og gir feilmelding uten reinnstallasjon.
 
-### Rutine ved oppdatering
+-   Kjør scriptet *app.R* for å teste at den fungerer med oppdaterte datasett.
 
--   Det er kun datakildene på noradstats google drive som trengs å oppdateres. Alle filer i appen skal være uendret, og laster automatisk ned oppdaterte datafiler fra *noradstats google drive*. Legg derfor inn oppdaterte datafiler i *noradstats google drive*, og vær oppmerksom på å bruke riktige filnavn og variabelnavn.
--   Oppdater alle pakker før opplasting til *shinyapps.io*. Viktig å reinnstallere pakken noradstats via *devtools::install_github("einartornes/noradstats")*. Det skyldes at noradstats har dependencies til en rekke andre pakker, og gir feilmelding uten reinnstallasjon.
--   Appen publiseres til *shinyapps.io* gjennom Rstudios *Publish the application or document* til følgende URL: <https://noradstats.shinyapps.io/landflak/>
+-   Appen publiseres til *shinyapps.io* gjennom Rstudios *Publish the application or document* til følgende URL: <https://noradstats.shinyapps.io/landflak/>. Merk at *alle* filene skal publiseres på shinyapps.io, inkludert word-template, som ikke alltid er huket av som default ved opplasting.
+
+-   Vanlige feilkilder ved publisering:
+
+    -   Feiltype 1: Appen publiseres ikke: Appen publiseres ikke, dvs. man får en feilmelding når man går til <https://noradstats.shinyapps.io/landflak/>. Sjekk loggen for appen på shinyapps.io for å se hvor i koden det har gått galt. Typiske feil er at det er en pakke den ikke finner (og må legges inn med library(), eller at pakkene ikke er oppdaterte.
+
+    -   Feil 2: Appen publiseres, slik at man kan logge inn i portalen, men når man genererer landflak, så får man ikke word-filer, men filer som heter "report.html" og beskjed om at det var mislykket. Denne feilen er vanskeligere å identifisere hva skyldes, fordi det ikke fremgår av loggen på shinyapps.io. En typisk feil er at fila word-template ikke er blitt med i opplastingen til shinyapps.io.
 
 ### Beskrivelse av filer
 
@@ -27,7 +36,7 @@ Appen er publisert som en nettside på følgende URL: <https://noradstats.shinya
     -   ui (front-end): spesifiserer nettsiden inkl. brukerinput fra landliste (parameter) og action-button (*Generer landflak i Microsoft Word-format*).
     -   server (back-end): kjører scriptet *landflak.Rmd* for valgte land (parameter) når bruker trykker action-button, og laster ned filen.
 
--   *get_data.R:* Script for å laste ned data fra *noradstats google drive*. Scriptet sources (kjøres) i scriptet *app.R. Scriptet laster ned dataene ved bruk av* R-pakken googledrive.
+-   *get_data.R:* Script for å laste ned alle datasett fra *noradstats google drive*. Må kjøres for appen kjøres (app.R).
 
 -   *import_data.R*: Script for å laste inn data fra mappen *data/*. Scriptet sources (kjøres) i scriptet *app.R*. Scriptet inkluderer også landnavn-kolonnen *recipient_country_no_visual* i alle datafilene, som er de visuelle landnavnene tilsvarende i bistandsresultater.no
 
