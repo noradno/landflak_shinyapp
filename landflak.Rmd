@@ -34,6 +34,7 @@ library(tidyr)
 library(ggplot2)
 library(tibble)
 library(forcats)
+library(readxl)
 library(flextable)
 library(officer)
 library(janitor) 
@@ -793,3 +794,13 @@ Tabellen under viser organisasjonsfordelingen av beregnet norsk multilateral kje
 ```{r imputed_org_table_print, ft.split = FALSE, ft.align = "left"}
 table_imp_org
 ```
+
+```{r timestamp}
+vec_today <- format(Sys.Date(), format="%d. %m. %Y")
+```
+
+<!-- Hopper over to linjer -->
+<br>
+<br>
+
+Landflaket ble lastet ned den `r vec_today` fra [Landflakportalen](https://noradstats.shinyapps.io/landflak/), produsert av Norads seksjon for Statistikk og analyse. Ved spørsmål, send epost til [statistikk@norad.no](mailto:statistikk@norad.no).
