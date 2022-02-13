@@ -3,8 +3,13 @@
 # Appen publseres via Rstudio desktop eller Rstudio Cloaud til shinyapps.io-serveren: https://noradstats.shinyapps.io/landflak/
 
 # Appens server kjører scriptet landflak.Rmd når bruker har valgt landparameter på nettsiden (ui)
-# Datagrunnlag: Scriptet sourcer to script (get_data.R og import_data.R) som laster ned og laster inn datagrunnlag.
+
 # Pakken noradstats må reinstalleres ved ny last til shinyapps.io: devtools::install_github("einartornes/noradstats")
+# Husk at alle filer skal inkluderes (inkl. word-template) når appen publiseres til shinyapps.io
+
+
+# Før appen kjøres: last ned datakilder med separat script: get_data.R ---
+# Scriptet get_data laster ned datafiler til mappen data/
 
 # Laster inn pakker ----
 library(shiny)
@@ -12,11 +17,9 @@ library(shinybusy)
 library(shinymanager)
 library(shinythemes)
 library(dplyr)
+library(markdown)
 
-# Laster ned datakilder fra noradstats google drive til subfolder .data/
-source("get_data.R")
-
-# Laster inn data i global environment ved å source scriptet import_data.R
+# Laster inn data i global environment ved å source scriptet import_data.R ---
 source("import_data.R")
 
 select_country <- df_oda_ten |>
