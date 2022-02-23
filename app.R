@@ -22,6 +22,7 @@ library(markdown)
 # Laster inn data i global environment ved å source scriptet import_data.R ---
 source("import_data.R")
 
+# Country list for user input
 select_country <- df_oda_ten |>
   filter(type_of_flow == "ODA") |>
   filter(type_of_agreement != "Rammeavtale") |>
@@ -29,7 +30,9 @@ select_country <- df_oda_ten |>
   filter(year == max(year)) |>
   group_by(recipient_country_no_visual) |>
   summarise(total = sum(disbursed_mill_nok)) |>
+  ungroup() |>
   filter(total > 0) |>
+  filter(!is.na(recipient_country_no_visual)) |>
   select(recipient_country_no_visual) |>
   arrange() |>
   pull()
