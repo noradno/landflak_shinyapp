@@ -789,7 +789,7 @@ OECDs beregninger tilsier at `r params$land` mottok `r vec_imp_maxyear_sum` mill
 
 Tabellen under viser organisasjonsfordelingen av beregnet norsk multilateral kjernestøtte til `r params$land` i `r vec_imp_org_maxyear`[^3]. Nyere beregninger fordelt på organisasjon er ikke tilgjengelig per i dag.
 
-[^3]: OECDs landfordelte beregninger omfatter kjernestøtte til de største, men ikke alle multilaterale organisasjoner. Om lag 90 prosent av multilateral kjernestøtte fra DAC-land inngår i OECDs landfordelte beregninger. Tabellen gir dermed ikke en fullstendig oversikt over beregnet kjernestøtte til mottakerlandet for alle multilaterale organisasjoner Norge støtter. På grunn av beregningsmetoden kan totalsummen i partneroversikten avvike fra det beregnede `r vec_imp_org_maxyear`-beløpet på forsiden.
+[^3]: OECDs landfordelte beregninger omfatter kjernestøtte til de største, men ikke alle multilaterale organisasjoner. Om lag 90 prosent av multilateral kjernestøtte fra DAC-land inngår i OECDs landfordelte beregninger. Tabellen gir dermed ikke en fullstendig oversikt over beregnet kjernestøtte til mottakerlandet for alle multilaterale organisasjoner Norge støtter.
 
 `r vec_imp_org_omtale` for den beregnede multilaterale kjernestøtten til `r params$land` i `r vec_imp_org_maxyear` var `r vec_imp_org_top`.
 
