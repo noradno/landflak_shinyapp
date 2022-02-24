@@ -3,8 +3,13 @@
 # Appen publseres via Rstudio desktop eller Rstudio Cloaud til shinyapps.io-serveren: https://noradstats.shinyapps.io/landflak/
 
 # Appens server kjører scriptet landflak.Rmd når bruker har valgt landparameter på nettsiden (ui)
-# Datagrunnlag: Scriptet sourcer to script (get_data.R og import_data.R) som laster ned og laster inn datagrunnlag.
+
 # Pakken noradstats må reinstalleres ved ny last til shinyapps.io: devtools::install_github("einartornes/noradstats")
+# Husk at alle filer skal inkluderes (inkl. word-template) når appen publiseres til shinyapps.io
+
+
+# Før appen kjøres: last ned datakilder med separat script: get_data.R ---
+# Scriptet get_data laster ned datafiler til mappen data/
 
 # Laster inn pakker ----
 library(shiny)
@@ -12,13 +17,12 @@ library(shinybusy)
 library(shinymanager)
 library(shinythemes)
 library(dplyr)
+library(markdown)
 
-# Laster ned datakilder fra noradstats google drive til subfolder .data/
-source("get_data.R")
-
-# Laster inn data i global environment ved å source scriptet import_data.R
+# Laster inn data i global environment ved å source scriptet import_data.R ---
 source("import_data.R")
 
+# Country list for user input
 select_country <- df_oda_ten |>
   filter(type_of_flow == "ODA") |>
   filter(type_of_agreement != "Rammeavtale") |>
@@ -26,7 +30,9 @@ select_country <- df_oda_ten |>
   filter(year == max(year)) |>
   group_by(recipient_country_no_visual) |>
   summarise(total = sum(disbursed_mill_nok)) |>
+  ungroup() |>
   filter(total > 0) |>
+  filter(!is.na(recipient_country_no_visual)) |>
   select(recipient_country_no_visual) |>
   arrange() |>
   pull()
@@ -64,8 +70,6 @@ ui <-
                    p(), br(),
                    includeMarkdown("ui_tekst.md"), # Tekstfil med info til brukere
                    p(), br(),
-                   "Sist oppdatert: ", Sys.Date(),
-                   p(), br(),
                    img(src = "norad_logo_black_small_rgb_micro.png")
             )
         )
@@ -83,8 +87,8 @@ ui <- secure_app(ui,
                  tags_bottom = tags$div(
                    tags$p("Ved spørsmål om innlogging, kontakt ",
                           tags$a(
-                            href = "mailto:post-stat@norad.no",
-                            target="_top", "post-stat@norad.no")),
+                            href = "mailto:statistikk@norad.no",
+                            target="_top", "statistikk@norad.no")),
                    tags$img(src = "norad_logo_black_small_rgb_micro.png")
                    )
                  )

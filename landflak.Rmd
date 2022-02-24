@@ -34,6 +34,7 @@ library(tidyr)
 library(ggplot2)
 library(tibble)
 library(forcats)
+library(readxl)
 library(flextable)
 library(officer)
 library(janitor) 
@@ -644,9 +645,11 @@ table_df_partner <- df_partner |>
   autofit(add_w = 0, add_h = 0) |> # Bruker autofit på høyde og bredde
   height_all(0.25, part = "all") |> # Justerer radhøyde
   hrule(rule = "exact", part = "all") |> #Justerer radhøyde
-  set_caption(caption = paste0("Avtalepartnere, øremerket bistand til ", params$land, " i ", max(df_oda_ten$year))) |>
+  add_header_lines(paste0("Avtalepartnere, øremerket bistand til ", params$land, " i ", max(df_oda_ten$year))) |>
   font(fontname = "Cambria", part = "all") |>
   fontsize(size = 11, part = "all") |>
+  fontsize(size = 12, part = "header", i = 1) |>
+  italic(part = "header", i = 1) |>
   bg(bg = "#eff4f4", part = "body", i = seq(1, nrow(df_partner)-1)) |>
   bg(bg = "#afcbca", part = "body", i = seq(1, nrow(df_partner)-1, 2)) # Fargelegger annenhver rad minus totalraden
 
@@ -677,7 +680,7 @@ vec_partneromtale <- case_when(
 
 <!-- Printer partnertabell -->
 
-```{r partner_table_print, ft.split = FALSE, ft.align = "left"}
+```{r partner_table_print, ft.align = "left"}
 table_df_partner
 ```
 
@@ -747,9 +750,11 @@ table_imp_org <- df_imp_org |>
   autofit(add_w = 0, add_h = 0) |> # Bruker autofit på høyde og bredde
   height_all(0.25, part = "all") |> # Justerer radhøyde
   hrule(rule = "exact", part = "all") |> #Justerer radhøyde
-  set_caption(caption = paste0("Avtalepartnere, beregnet multilateral kjernestøtte til ", params$land, " i ", vec_imp_org_maxyear)) |>
+  add_header_lines(paste0("Avtalepartnere, beregnet multilateral kjernestøtte til ", params$land, " i ", vec_imp_org_maxyear)) |>
   font(fontname = "Cambria", part = "all") |>
   fontsize(size = 11, part = "all") |>
+  fontsize(size = 12, part = "header", i = 1) |>
+  italic(part = "header", i = 1) |>
   bg(bg = "#FBF7EE", part = "body", i = seq(1, nrow(df_imp_org)-1)) |>
   bg(bg = "#EED8AC", part = "body", i = seq(1, nrow(df_imp_org)-1, 2)) # Fargelegger annenhver rad minus totalraden
 
@@ -784,12 +789,23 @@ OECDs beregninger tilsier at `r params$land` mottok `r vec_imp_maxyear_sum` mill
 
 Tabellen under viser organisasjonsfordelingen av beregnet norsk multilateral kjernestøtte til `r params$land` i `r vec_imp_org_maxyear`[^3]. Nyere beregninger fordelt på organisasjon er ikke tilgjengelig per i dag.
 
-[^3]: OECDs landfordelte beregninger omfatter kjernestøtte til de største, men ikke alle multilaterale organisasjoner. Om lag 90 prosent av multilateral kjernestøtte fra DAC-land inngår i OECDs landfordelte beregninger. Tabellen gir dermed ikke en fullstendig oversikt over beregnet kjernestøtte til mottakerlandet for alle multilaterale organisasjoner Norge støtter. På grunn av beregningsmetoden kan totalsummen i partneroversikten avvike fra det beregnede `r vec_imp_org_maxyear`-beløpet på forsiden.
+[^3]: OECDs landfordelte beregninger omfatter kjernestøtte til de største, men ikke alle multilaterale organisasjoner. Om lag 90 prosent av multilateral kjernestøtte fra DAC-land inngår i OECDs landfordelte beregninger. Tabellen gir dermed ikke en fullstendig oversikt over beregnet kjernestøtte til mottakerlandet for alle multilaterale organisasjoner Norge støtter.
 
 `r vec_imp_org_omtale` for den beregnede multilaterale kjernestøtten til `r params$land` i `r vec_imp_org_maxyear` var `r vec_imp_org_top`.
 
 <!-- Printer partnertabell -->
 
-```{r imputed_org_table_print, ft.split = FALSE, ft.align = "left"}
+```{r imputed_org_table_print, ft.align = "left"}
 table_imp_org
 ```
+
+```{r timestamp}
+vec_today <- format(Sys.Date(), format="%d. %m. %Y")
+```
+
+<!-- Hopper over noen linjer -->
+<br>
+<br>
+<br>
+
+Landflaket ble lastet ned den `r vec_today` fra [Landflakportalen](https://noradstats.shinyapps.io/landflak/), produsert av Norads [Seksjon for Statistikk og analyse](mailto:statistikk@norad.no).

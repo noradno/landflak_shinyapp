@@ -1,5 +1,4 @@
 # Scriptet laster ned datakilder som brukes i appen fra noradstats google drive
-# Scriptet sources inn i scriptet app.R, og trenger dermed ikke å kjøres separat
 # Datakildene lastes ned til undermappen ./data
 
 # Loading packages
