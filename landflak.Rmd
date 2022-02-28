@@ -289,9 +289,12 @@ table_total <- df_total_tbl |>
   hline(border = officer::fp_border(color="black"), part = "body", i = nrow(df_total_tbl)-1) |>
   fit_to_width(max_width = 8) |> # Spesifiserer maksimal bredde på tabell til 7.5 inch.
   width(width = 1.9, j = 1) |> # Justerer bredden på kolonne 1
-  set_caption(caption = paste0("Bistand til ", params$land, " ", vec_all_years[1],"-", vec_all_years[10], ", fordelt på type bistand. NOK mill.")) |>
+  #set_caption(caption = paste0("Bistand til ", params$land, " ", vec_all_years[1],"-", vec_all_years[10], ", fordelt på type bistand. NOK mill.")) |>
+  add_header_lines(paste0("Bistand til ", params$land, " ", vec_all_years[1],"-", vec_all_years[10], ", fordelt på type bistand. NOK mill.")) |>
   font(fontname = "Cambria", part = "all") |>
   fontsize(size = 11, part = "all") |>
+  fontsize(size = 12, part = "header", i = 1) |>
+  italic(part = "header", i = 1) |>
   bg(bg = c("#afcbca", "#EED8AC"), part = "body", i = c(1,2)) # Fargelegger rader
 
 # Fjerner overflødige datasett
