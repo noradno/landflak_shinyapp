@@ -45,7 +45,7 @@ ui <-
     fluidPage(
         
         # Tema
-        theme = shinytheme("cerulean"),
+        #theme = shinythemes::shinytheme("cerulean"),
         
         # Overskrift
         titlePanel(title = "Landflak - bistand til enkeltland"),

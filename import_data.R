@@ -8,10 +8,12 @@ library(readxl)
 library(janitor)
 library(noradstats)
 
-
 # Kilde A: Bistandsstatistikk 10 år (oda_ten)
 df_oda_ten <- 
-  noradstats::read_aiddata("data/oda_ten.csv") |>
+  noradstats::read_aiddata("data/statsys_aktiv_slipp2022.csv") |>
+  filter(`Type of Flow` == "ODA") |>
+  filter(`Type of agreement` != "Rammeavtale") |>
+  filter(Year %in% max(Year-9):max(Year)) |> 
   
   # Velger variabler, grupperer og summerer
   group_by(`Recipient country NO`,
