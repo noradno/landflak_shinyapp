@@ -7,7 +7,7 @@
 -   Landflakene sammenstiller offisiell statistikk på øremerket bistand til enkeltland, fra Norge og andre medlemsland i OECDs utviklingskomite (DAC). I tillegg presenteres offisielle beregninger fra OECD på hvor mye av Norges multilaterale kjernestøtte som brukes på mottakerlandet. Landflakene dekker en tiårsperiode.
 -   Bruker kan velge blant alle land som mottok øreemerket bistand ved forrige rapporteringsår.
 -   Appen bygges med scriptet *app.R*, som spesifiserer både ui (front-end) og server (back-end).
--   Appen er publisert som en nettside på følgende URL: <https://noradstats.shinyapps.io/landflak/>. I tillegg er test-portal på følgende URL: <https://noradstats.shinyapps.io/landflak_test/>.
+-   Appen er publisert som en nettside på følgende URL: <https://noradstats.shinyapps.io/landflak/>. I tillegg er test-portal på følgende URL: <https://noradstats.shinyapps.io/landflak_shinyapp_test/>.
 
 ### Rutine ved oppdatering av datakilder
 
