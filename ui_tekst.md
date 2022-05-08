@@ -4,7 +4,7 @@ Landflakene sammenstiller offisiell statistikk på øremerket bistand til enkelt
 <br>
 I tillegg presenteres offisielle beregninger fra OECD på hvor mye av Norges multilaterale kjernestøtte som brukes på mottakerlandet.
 
-Det er mulig å laste ned landflak for alle land som mottok bistand fra Norge ved forrige rapporteringsår. Landflakene er kun tilgjengelig på norsk.
+Det er tilgang til å laste ned landflak for alle land som mottok bistand fra Norge ved forrige rapporteringsår. Landflakene er kun tilgjengelig på norsk.
 <br>
 Statistikken i landflakene dekker en tiårsperiode.
 
