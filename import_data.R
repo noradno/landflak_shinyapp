@@ -13,7 +13,7 @@ library(here)
 # Kilde A: Bistandsstatistikk 10 år (oda_ten)
 df_oda_ten <- 
   noradstats::read_aiddata(here("data", "statsys_ten.csv")) |>
-  filter(`Type of Flow`== "ODA") |>
+  filter(`Type of Flow` == "ODA") |>
   filter(`Type of agreement` != "Rammeavtale") |>
   filter(Year %in% max(Year-9):max(Year)) |> 
   
