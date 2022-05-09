@@ -120,7 +120,7 @@ plot_dac <- ggplot(data = df_dac, aes(x = oecd_donor_no, y = usd_mill)) +
            label = paste0("Totalsum til landet fra DAC-giverland: ", vec_dac_totalsum, " mill. USD\n",
                           "Antall DAC-giverland til landet: ", vec_dac_donors_count)) +
   labs(title = paste0("Største giverland til ", params$land, " i ", vec_dac_maxyear, ". USD mill."),
-       subtitle = "Øremerket ODA fra medlemsland i OECD DAC (uten tilbakebetalinger)") +
+       subtitle = "Øremerket ODA fra medlemsland i OECD DAC (netto utbetalinger)") +
   theme_minimal() +
   theme(plot.title.position = 'plot', # Tittelposisjon helt til venstre i plottet
         plot.title = element_text(size = 12, face = "italic"),

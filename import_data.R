@@ -7,6 +7,7 @@ library(dplyr)
 library(readxl)
 library(janitor)
 library(noradstats)
+library(here)
 
 # Kilde A: Bistandsstatistikk 10 år (oda_ten)
 df_oda_ten <- 
@@ -16,7 +17,8 @@ df_oda_ten <-
   filter(Year %in% max(Year-9):max(Year)) |> 
   
   # Velger variabler, grupperer og summerer
-  group_by(`Recipient country NO`,
+  group_by(`Recipient country CRS`,
+           `Recipient country NO`,
            Year,
            `Type of Flow`,
            `Type of agreement`,
@@ -38,7 +40,32 @@ df_oda_ten <-
 df_imp_raw <- read_excel(path = "data/imputed_multi_land.xlsx", sheet = 1) |>
   janitor::clean_names()
 
-# Kilde C. Imputed multilateral organisasjonsfordelt, ett år (kilde: tilsendt fra OECD)
+# Land
+df_countries <- df_oda_ten |>
+  filter(type_of_flow == "ODA") |>
+  filter(type_of_agreement != "Rammeavtale") |>
+  filter(income_category != "Unspecified") |>
+  filter(year %in% c((max(year)-9):(max(year)))) |>
+  mutate(recipient_country_crs = as.character(recipient_country_crs)) |>
+  group_by(recipient_country_no, recipient_country_crs) |>
+  summarise(total = sum(disbursed_mill_nok)) |>
+  ungroup() |>
+  filter(total > 0) |>
+  filter(!is.na(recipient_country_no)) |>
+  select(recipient_country_crs, recipient_country_no) |>
+  arrange()
+
+
+df_dac <- readxl::read_xlsx(here("data", "df_dac.xlsx"))
+
+df_dac <- df_dac %>% select(RECIPIENT, RECIPIENT_label.en)
+
+
+df_test <- left_join(df_countries, df_dac, by = c("recipient_country_crs" = "RECIPIENT"))
+df_test %>% filter(is.na(RECIPIENT_label.en))
+
+
+ 8# Kilde C. Imputed multilateral organisasjonsfordelt, ett år (kilde: tilsendt fra OECD)
 df_imp_org_raw <- read_excel(path = "data/imputed_multi_land_org.xlsx") |>
   janitor::clean_names()
 
