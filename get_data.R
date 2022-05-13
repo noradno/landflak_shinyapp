@@ -13,7 +13,6 @@ googledrive::drive_find()
 
 # Selecting files to download
 files <- c("statsys_ten.csv",
-           "oecd_dac_donors.xlsx",
            "land_og_regioner.xlsx",
            "imputed_multi_land_org.xlsx",
            "imputed_multi_land.xlsx")
