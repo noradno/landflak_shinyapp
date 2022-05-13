@@ -55,17 +55,7 @@ df_countries <- df_oda_ten |>
   select(recipient_country_crs, recipient_country_no) |>
   arrange()
 
-
-df_dac <- readxl::read_xlsx(here("data", "df_dac.xlsx"))
-
-df_dac <- df_dac %>% select(RECIPIENT, RECIPIENT_label.en)
-
-
-df_test <- left_join(df_countries, df_dac, by = c("recipient_country_crs" = "RECIPIENT"))
-df_test %>% filter(is.na(RECIPIENT_label.en))
-
-
- 8# Kilde C. Imputed multilateral organisasjonsfordelt, ett år (kilde: tilsendt fra OECD)
+# Kilde C. Imputed multilateral organisasjonsfordelt, ett år (kilde: tilsendt fra OECD)
 df_imp_org_raw <- read_excel(path = "data/imputed_multi_land_org.xlsx") |>
   janitor::clean_names()
 
