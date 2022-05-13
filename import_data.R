@@ -1,4 +1,4 @@
-# Scriptet laster inn datakilder som brukes i appen og inkluderer visuell mottakerland-kolonne i alle datafiler.
+# Scriptet laster inn data som brukes i appen og inkluderer visuell mottakerland-kolonne i alle datafiler.
 # Scriptet sources inn i scriptet app.R, og trenger dermed ikke å kjøres separat
 # Datakildene lastes inn fra mappen data/
 
@@ -63,14 +63,39 @@ df_landreg_raw <- read_csv2(here("data", "land_og_regioner.csv")) |>
 # Legger til kolonne med visuell landnavn
 df_oda_ten <- left_join(x = df_oda_ten, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
 
-# Kilde B. Imputed multilteral 10 år (kilde: OECDs imputed-data på https://stats.oecd.org/) ----
-df_imp_raw <- read_excel(path = "data/imputed_multi_land.xlsx", sheet = 1) |>
+
+# Kilde B. Imputed multilteral 10 år. Fra mappen /data hentet av scriptet get_data_imputed.R ----
+
+df_imp_raw <- readr::read_csv(here("data", "nor_imputed.csv")) |>
   janitor::clean_names()
 
-# Legger til kolonne med visuell landnavn
-df_imp_raw <- left_join(x = df_imp_raw, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
+# Filtrerer til kun land som mottok øremerket bistand fra Norge sist år
+df_imp_raw <- df_imp_raw |> 
+  filter(recipient %in% df_countries$recipient_country_crs)
 
-# Kilde C. Imputed multilateral organisasjonsfordelt, ett år (kilde: tilsendt fra OECD) ----
+# Legger til kolonne med crs landkode
+df_imp_raw <- left_join(x = df_imp_raw, y = df_countries, by = c("recipient" = "recipient_country_crs"))
+
+# Legger til kolonne med visuell landnavn
+df_imp_raw <- left_join(x = df_imp_raw, y = df_landreg_raw, by = c("recipient_country" = "recipient_country_i_statsys"))
+
+# Filtrerer vekk land uten beløp og velger kolonner
+df_imp_raw <- df_imp_raw |> 
+  filter(usd_mill != 0) |> 
+  mutate(year = obs_time,
+         oecd_donor_no = donor_label_en,
+         disbursed_mill_nok = nok_mill) |> 
+  select(oecd_donor_no, recipient_country_no_visual, disbursed_mill_nok, year)
+
+# Gammel kode for å laste inn kilde B fra excelark
+# df_imp_raw <- read_excel(path = "data/imputed_multi_land.xlsx", sheet = 1) |>
+#   janitor::clean_names()
+
+# Legger til kolonne med visuell landnavn
+#df_imp_raw <- left_join(x = df_imp_raw, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
+
+
+# Kilde C. Imputed multilateral organisasjonsfordelt, ett år. Fra mappen /data hentet av scriptet get_data_donors.R ----
 df_imp_org_raw <- read_excel(path = "data/imputed_multi_land_org.xlsx") |>
   janitor::clean_names()
 
@@ -78,10 +103,6 @@ df_imp_org_raw <- read_excel(path = "data/imputed_multi_land_org.xlsx") |>
 df_imp_org_raw <- left_join(x = df_imp_org_raw, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
 
 # Kilde D. Internasjonal bistand fra DAC-land, ett år (kilde: OECDs CRS-data på https://stats.oecd.org/) ----
-# df_dac_raw <- read_excel(path = "data/oecd_dac_donors.xlsx", sheet = 1) |>
-#   janitor::clean_names()
-# Legger til kolonne med visuell landnavn
-# df_dac_raw <- left_join(x = df_dac_raw, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
 
 df_dac_raw <- readr::read_csv(here("data", "dac_donors.csv")) |>
   janitor::clean_names()
@@ -102,5 +123,11 @@ df_dac_raw <- df_dac_raw |>
   mutate(year = obs_time,
          oecd_donor_no = donor_label_en) |> 
   select(oecd_donor_no, recipient_country_no_visual, usd_mill, year)
+
+# Gammel kode for å laste inn kilde C fra excelark
+# df_dac_raw <- read_excel(path = "data/oecd_dac_donors.xlsx", sheet = 1) |>
+#   janitor::clean_names()
+# Legger til kolonne med visuell landnavn
+# df_dac_raw <- left_join(x = df_dac_raw, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
 
 rm(df_landreg_raw)
