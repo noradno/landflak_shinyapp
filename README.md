@@ -13,9 +13,9 @@
 
 -   Det er kun datakildene på noradstats google drive som trengs å oppdateres. Legg derfor inn oppdaterte datafiler i *noradstats google drive*, og vær oppmerksom på å bruke like filnavn og variabelnavn som forrige filversjoner. Slett gamle filer, slik at det ikke er flere filer med samme navn. Ingen scripts eller andre filer skal endres når datakildene oppdateres.
 
--   Kjør scriptet *get_data.R* for å laste ned datakilder (xlsx og csv) fra *noradstats google drive*. Filene lagres i mappen /data.
--   Kjør scriptet *get_data_donors* for å hente data fra OECDs API på DAC-lands ODA til enkeltland. Lagres som csv i mappen /data.
--   Kjør scriptet *get_data_imputed* for å hente data fra OECDs API på Norsk beregnet imputert kjernestøtte til enkeltland. Lagres som csv i mappen /data.
+-   Kjør scriptet *get_data.R* for å laste ned csv-filer fra *noradstats google drive*. Filene lagres i mappen /data.
+-   Kjør scriptet *get_data_donors* for å hente data fra OECDs API på DAC-lands ODA til enkeltland. Lagres som csv i mappen /data. Husk å oppdater årstall for årgang i starten av scriptet for at nyeste data skal hentes.
+-   Kjør scriptet *get_data_imputed* for å hente data fra OECDs API på Norsk beregnet imputert kjernestøtte til enkeltland. Lagres som csv i mappen /data. Husk å oppdater årstall for årgang i starten av scriptet for at nyeste data skal hentes.
 
 -   Oppdater alle pakker og R-versjonen før opplasting til *shinyapps.io*. Viktig å av- og reinnstallere pakken noradstats via *devtools::install_github("einartornes/noradstats")*. Det skyldes at noradstats har dependencies til en rekke andre pakker, og gir feilmelding uten reinnstallasjon.
 

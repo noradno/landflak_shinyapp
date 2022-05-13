@@ -96,7 +96,7 @@ df_imp_raw <- df_imp_raw |>
 
 
 # Kilde C. Imputed multilateral organisasjonsfordelt, ett år. Fra mappen /data hentet av scriptet get_data_donors.R ----
-df_imp_org_raw <- read_excel(path = "data/imputed_multi_land_org.xlsx") |>
+df_imp_org_raw <- read_csv2(here("data", "imputed_multi_land_org.csv")) |>
   janitor::clean_names()
 
 # Legger til kolonne med visuell landnavn
