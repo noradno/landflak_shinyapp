@@ -4,7 +4,7 @@
 
 # Appens server kjører scriptet landflak.Rmd når bruker har valgt landparameter på nettsiden (ui)
 
-# Pakken noradstats må reinstalleres ved ny last til shinyapps.io: devtools::install_github("einartornes/noradstats")
+# Pakken noradstats må reinstalleres ved ny last til shinyapps.io: devtools::install_github("noradno/noradstats")
 # Husk at alle filer skal inkluderes (inkl. word-template) når appen publiseres til shinyapps.io
 
 

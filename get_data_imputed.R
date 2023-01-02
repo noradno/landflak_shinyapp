@@ -2,10 +2,11 @@
 
 library(rsdmx)
 library(tidyverse)
+library(here)
 
 # Spesifiserer år
-vec_startyear <- 2010
-vec_endyear <- 2019
+vec_endyear <- 2020
+vec_startyear <- vec_endyear - 9
 
 # Her brukes OECD-datasettet TABLE2A inkludert metadata.
 # For å spesifisere key-argumentet, så identifiser hvilke keys-dimensjoner som finnes i datasettet og kan spesifiseres. Punktum-tegnet skiller dimensjonene.
@@ -81,4 +82,5 @@ df_imputed <- left_join(df_imputed, df_exchangerate, by = "obsTime")
 df_imputed <- df_imputed %>%
   mutate(nok_mill = usd_mill * exchangerate)
 
-glimpse(df_imputed)
+# Lagrer i data-mappe
+readr::write_csv(df_imputed, here("data", "nor_imputed.csv"))
