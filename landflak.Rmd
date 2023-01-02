@@ -82,7 +82,7 @@ df_dac <- df_dac |>
 
 # Norges rangering blant giverland
 vec_dac_norway_rank <- df_dac |>
-  filter(oecd_donor_no == "Norge") |>
+  filter(oecd_donor_no == "Norway") |>
   pull(number_string)
 
 # Totalsum fra giverland til aktuelle mottakerland
