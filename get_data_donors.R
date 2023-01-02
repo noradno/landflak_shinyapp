@@ -5,7 +5,7 @@ library(tidyverse)
 library(here)
 
 # Velger år
-vec_year <- 2020
+vec_year <- 2021
 
 # Her brukes OECD-datasettet TABLE2A inkludert metadata.
 # For å spesifisere key-argumentet, så identifiser hvilke keys-dimensjoner som finnes i datasettet og kan spesifiseres. Punktum-tegnet skiller dimensjonene.
