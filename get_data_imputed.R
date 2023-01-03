@@ -53,25 +53,33 @@ df_imputed <- df_imputed %>%
 # URLen er hentet fra nettsiden oecd.stat under National accounts -> Annual National Accounts -> Main aggregates -> 4.PPPs and exchange rates.
 # Har spesifisert URL-en til å filtrere på dimensjonene NOR.EXC.CD. Se i Annex for å idendtifisere dimensjonene, deres rekkefølge og verdier for filtrering.
 
-sdmx_exchangerate <- readSDMX(
-  providerId = "OECD",
-  resource = "data",
-  flowRef = "SNA_TABLE4",
-  key = "NOR.EXC.CD",
-  key.mode = "SDMX",
-  start = vec_startyear,
-  end = vec_endyear,
-  dsd = TRUE
-)
+# sdmx_exchangerate <- readSDMX(
+#   providerId = "OECD",
+#   resource = "data",
+#   flowRef = "SNA_TABLE4",
+#   key = "NOR.EXC.CD",
+#   key.mode = "SDMX",
+#   start = vec_startyear,
+#   end = vec_endyear,
+#   dsd = TRUE
+# )
 
 # Inkluder argument labels= TRUE for å få med metadata-kolonner
-df_exchangerate <- as.data.frame(sdmx_exchangerate) %>%
-  as_tibble()
+# df_exchangerate <- as.data.frame(sdmx_exchangerate) %>%
+#   as_tibble()
 
 # Velger relevante kolonner og gir nytt navn til verdikolonne
-df_exchangerate <- df_exchangerate %>%
-  select(obsTime, obsValue) %>%
-  rename(exchangerate = obsValue)
+# df_exchangerate <- df_exchangerate %>%
+#   select(obsTime, obsValue) %>%
+#   rename(exchangerate = obsValue)
+
+# Vekslingskurs NOR - USD fra OECD (bruker csv istedet for API fordi APIet over ikke har bistands-vekslingskurser) ----------------------------------------
+
+df_exchangerate <- read_csv2(here("data", "exchangerate.csv"))
+
+df_exchangerate <- df_exchangerate |> 
+  rename(exchangerate = obsValue) |> 
+  mutate(obsTime = as.character(obsTime))
 
 # Inkluderer vekslingskurs-kolonne i df_imputed datasett------------------
 
