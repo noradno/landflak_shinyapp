@@ -792,7 +792,7 @@ vec_imp_org_omtale <- case_when(
 OECDs beregninger tilsier at `r params$land` mottok `r vec_imp_maxyear_sum` millioner kroner av Norges kjernestøtte til multilaterale organisasjoner i `r vec_imp_maxyear`[^3].
 <!-- `r vec_earmarked_maxyear`-beregninger er ikke tilgjengelige per i dag. -->
 
-[^3]: På grunn av avrundinger i OECDs beregninger kan det være noe avvik mellom totalbeløpet på multilateral kjernestøtte til landet i `r vec_imp_maxyear` i denne tabellen og på forsiden.
+[^3]: På grunn av avrundinger i OECDs beregninger kan det være noe avvik mellom totalbeløpet på multilateral kjernestøtte til landet i `r vec_imp_org_maxyear` i denne tabellen og på forsiden.
 
 Tabellen under viser organisasjonsfordelingen av beregnet norsk multilateral kjernestøtte til `r params$land` i `r vec_imp_org_maxyear`[^4]. Nyere beregninger fordelt på organisasjon er ikke tilgjengelig per i dag.
 
