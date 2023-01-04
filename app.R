@@ -99,8 +99,8 @@ server <- function(input, output) {
     # Passordbeskyttelse: Sjekker credentials for å godkjenne innlogging
     res_auth <- secure_server(
         check_credentials = check_credentials(data.frame(
-            user = c("norad", "landflak123", "landflak"),
-            password = c("norad", "landflak123", "landflak321"),
+            user = "landflak",
+            password = "landflak321",
             stringsAsFactors = FALSE))
     )
     

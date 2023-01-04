@@ -14,7 +14,8 @@ googledrive::drive_find()
 # Selecting files to download
 files <- c("statsys_ten.csv",
            "land_og_regioner.csv",
-           "imputed_multi_land_org.csv")
+           "imputed_multi_land_org.csv",
+           "exchangerate.csv")
 
 # Filepath til undermappe ./data
 paths <- paste0("data/", files)

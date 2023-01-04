@@ -82,7 +82,7 @@ df_dac <- df_dac |>
 
 # Norges rangering blant giverland
 vec_dac_norway_rank <- df_dac |>
-  filter(oecd_donor_no == "Norge") |>
+  filter(oecd_donor_no == "Norway") |>
   pull(number_string)
 
 # Totalsum fra giverland til aktuelle mottakerland
@@ -788,11 +788,13 @@ vec_imp_org_omtale <- case_when(
   length(unique(df_imp_org_text$Avtalepartner)) == 1 ~ "Partneren")
 ```
 
-OECDs beregninger tilsier at `r params$land` mottok `r vec_imp_maxyear_sum` millioner kroner av Norges kjernestøtte til multilaterale organisasjoner i `r vec_imp_maxyear`. `r vec_earmarked_maxyear`-beregninger er ikke tilgjengelige per i dag.
+OECDs beregninger tilsier at `r params$land` mottok `r vec_imp_maxyear_sum` millioner kroner av Norges kjernestøtte til multilaterale organisasjoner i `r vec_imp_maxyear`[^3]. `r vec_earmarked_maxyear`-beregninger er ikke tilgjengelige per i dag.
 
-Tabellen under viser organisasjonsfordelingen av beregnet norsk multilateral kjernestøtte til `r params$land` i `r vec_imp_org_maxyear`[^3]. Nyere beregninger fordelt på organisasjon er ikke tilgjengelig per i dag.
+[^3]: På grunn av avrundinger i OECDs beregninger kan være noe avvik mellom totalbeløpet på multilateral kjernestøtte til landet i `r vec_imp_maxyear` i denne tabellen og på forsiden.
 
-[^3]: OECDs landfordelte beregninger omfatter kjernestøtte til de største, men ikke alle multilaterale organisasjoner. Om lag 90 prosent av multilateral kjernestøtte fra DAC-land inngår i OECDs landfordelte beregninger. Tabellen gir dermed ikke en fullstendig oversikt over beregnet kjernestøtte til mottakerlandet for alle multilaterale organisasjoner Norge støtter.
+Tabellen under viser organisasjonsfordelingen av beregnet norsk multilateral kjernestøtte til `r params$land` i `r vec_imp_org_maxyear`[^4]. Nyere beregninger fordelt på organisasjon er ikke tilgjengelig per i dag.
+
+[^4]: OECDs landfordelte beregninger omfatter kjernestøtte til de største, men ikke alle multilaterale organisasjoner. Om lag 90 prosent av multilateral kjernestøtte fra DAC-land inngår i OECDs landfordelte beregninger. Tabellen gir dermed ikke en fullstendig oversikt over beregnet kjernestøtte til mottakerlandet for alle multilaterale organisasjoner Norge støtter.
 
 `r vec_imp_org_omtale` for den beregnede multilaterale kjernestøtten til `r params$land` i `r vec_imp_org_maxyear` var `r vec_imp_org_top`.
 
