@@ -14,7 +14,7 @@ vec_startyear <- vec_endyear - 9
 # Keys-argumentet:
 # Punktum er skilletegnet mellom de fem keys.
 # RECIPIENT: Oppgir ingen verdi (alle mottakerland)
-# DONOR: De 29 DAC-landene (separtert med pluss)
+# DONOR: Norge (8))
 # PART: 1 (utviklingsland)
 # AIDTYPE: 206 (Total net ODA)
 # DATATYPE A (Current prices)
