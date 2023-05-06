@@ -1,0 +1,13 @@
+name: landflak-test
+title: landflak-test
+username:
+account: noradstats
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 9042634
+bundleId: 7181801
+url: https://noradstats.shinyapps.io/landflak-test/
+when: 1683366856.2051
+lastSyncTime: 1683366856.20512
+asMultiple: FALSE
+asStatic: FALSE
