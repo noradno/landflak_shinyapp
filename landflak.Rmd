@@ -119,8 +119,8 @@ plot_dac <- ggplot(data = df_dac, aes(x = oecd_donor_no, y = usd_mill)) +
   annotate("text", x = 1, y = df_dac$usd_mill[[1]], hjust = 1, family = "serif", vjust = 0.5, size = 3.5,
            label = paste0("Totalsum til landet fra DAC-giverland: ", vec_dac_totalsum, " mill. USD\n",
                           "Antall DAC-giverland til landet: ", vec_dac_donors_count)) +
-  labs(title = paste0("Største giverland til ", params$land, " i ", vec_dac_maxyear, ". USD mill."),
-       subtitle = "Øremerket ODA fra medlemsland i OECD DAC (netto utbetalinger)") +
+  labs(title = paste0("St\u00f8rste giverland til ", params$land, " i ", vec_dac_maxyear, ". USD mill."),
+       subtitle = "\u00d8remerket ODA fra medlemsland i OECD DAC (netto utbetalinger)") +
   theme_minimal() +
   theme(plot.title.position = 'plot', # Tittelposisjon helt til venstre i plottet
         plot.title = element_text(size = 12, face = "italic"),
@@ -163,7 +163,7 @@ df_earmarked <- df_oda_ten |>
          type_of_agreement != "Rammeavtale") |>                 
   group_by(year) |>
   summarise(mill_nok = sum(disbursed_mill_nok)) |>
-  add_column(type_bistand = "Øremerket bistand", .before = 1 ) |>
+  add_column(type_bistand = "\u00d8remerket bistand", .before = 1 ) |>
   ungroup()
 
 # Passer på at år uten data i tiårsperioden også inkluderes
@@ -173,7 +173,7 @@ vec_all_years <- min(unique(df_oda_ten$year)):max(unique(df_oda_ten$year))
 for(i in seq_along(vec_all_years)) {
   if (!vec_all_years[i] %in% df_earmarked$year) {
     df_earmarked <- df_earmarked |>
-      add_row(type_bistand = "Øremerket bistand",
+      add_row(type_bistand = "\u00d8remerket bistand",
               year = vec_all_years[i],
               mill_nok = 0) |>
       arrange(year)
@@ -187,7 +187,7 @@ df_imp <- df_imp_raw |>
   rename(mill_nok = disbursed_mill_nok) |>
   select(year, mill_nok) |>
   mutate(year = as.numeric(year)) |>
-  add_column(type_bistand = "Beregnet multilateral kjernestøtte", .before = 1)
+  add_column(type_bistand = "Beregnet multilateral kjernest\u00f8tte", .before = 1)
 
 # Datasett med øremerket og imputert kjernestøtte
 df_total <- bind_rows(df_earmarked, df_imp) 
@@ -435,7 +435,7 @@ plot_tema <- ggplot(df_tema, aes(x = reorder(target_area_no, mill_nok), y = mill
 
 # Lager tittel som er justert helt til venstre i figuren. Lar seg ikke gjøre direkte i ggplot.
 title.grob <- textGrob(
-    label = paste0("Tematisk fordeling, øremerket bistand til ", params$land, " i ", vec_earmarked_maxyear),
+    label = paste0("Tematisk fordeling, \u00f8remerket bistand til ", params$land, " i ", vec_earmarked_maxyear),
     x = unit(0, "lines"), 
     y = unit(0, "lines"),
     hjust = 0, vjust = 0, # Venstrejusterer tittelen
@@ -551,7 +551,7 @@ plot_partnertype <- ggplot(data = df_partnertype, aes(x = reorder(partner_group_
 
 # Lager tittel som er justert helt til venstre i figuren. Lar seg ikke gjøre direkte i ggplot.
 title.grob <- textGrob(
-    label = paste0("Type partner, øremerket bistand til ", params$land, " i ", vec_earmarked_maxyear),
+    label = paste0("Type partner, \u00f8remerket bistand til ", params$land, " i ", vec_earmarked_maxyear),
     x = unit(0, "lines"), 
     y = unit(0, "lines"),
     hjust = 0, vjust = 0, # Venstrejusterer tittelen
@@ -648,7 +648,7 @@ table_df_partner <- df_partner |>
   autofit(add_w = 0, add_h = 0) |> # Bruker autofit på høyde og bredde
   height_all(0.25, part = "all") |> # Justerer radhøyde
   hrule(rule = "exact", part = "all") |> #Justerer radhøyde
-  add_header_lines(paste0("Avtalepartnere, øremerket bistand til ", params$land, " i ", max(df_oda_ten$year))) |>
+  add_header_lines(paste0("Avtalepartnere, \u00f8remerket bistand til ", params$land, " i ", max(df_oda_ten$year))) |>
   font(fontname = "Cambria", part = "all") |>
   fontsize(size = 11, part = "all") |>
   fontsize(size = 12, part = "header", i = 1) |>
@@ -673,7 +673,7 @@ vec_partner_top <- case_when(
 
 # Til tekst: partneromtale
 vec_partneromtale <- case_when(
-  length(unique(df_partner_tekst$Avtalepartner)) > 3 ~ "De tre største partnerne",
+  length(unique(df_partner_tekst$Avtalepartner)) > 3 ~ "De tre st\u00f8rste partnerne",
   length(unique(df_partner_tekst$Avtalepartner)) == 3 ~ "Partnerne",
   length(unique(df_partner_tekst$Avtalepartner)) == 2 ~ "Partnerne",
   length(unique(df_partner_tekst$Avtalepartner)) == 1 ~ "Partneren")
@@ -753,7 +753,7 @@ table_imp_org <- df_imp_org |>
   autofit(add_w = 0, add_h = 0) |> # Bruker autofit på høyde og bredde
   height_all(0.25, part = "all") |> # Justerer radhøyde
   hrule(rule = "exact", part = "all") |> #Justerer radhøyde
-  add_header_lines(paste0("Avtalepartnere, beregnet multilateral kjernestøtte til ", params$land, " i ", vec_imp_org_maxyear)) |>
+  add_header_lines(paste0("Avtalepartnere, beregnet multilateral kjernest\u00f8tte til ", params$land, " i ", vec_imp_org_maxyear)) |>
   font(fontname = "Cambria", part = "all") |>
   fontsize(size = 11, part = "all") |>
   fontsize(size = 12, part = "header", i = 1) |>
@@ -782,7 +782,7 @@ vec_imp_org_top <- case_when(
 
 # Utrykk i tekst
 vec_imp_org_omtale <- case_when(
-  length(unique(df_imp_org_text$Avtalepartner)) > 3 ~ "De tre største partnerne",
+  length(unique(df_imp_org_text$Avtalepartner)) > 3 ~ "De tre st\u00f8rste partnerne",
   length(unique(df_imp_org_text$Avtalepartner)) == 3 ~ "Partnerne",
   length(unique(df_imp_org_text$Avtalepartner)) == 2 ~ "Partnerne",
   length(unique(df_imp_org_text$Avtalepartner)) == 1 ~ "Partneren")

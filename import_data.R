@@ -10,9 +10,13 @@ library(janitor)
 library(noradstats)
 library(here)
 
+
 # Kilde A: Bistandsstatistikk 10 år (oda_ten)
 df_oda_ten <- 
-  noradstats::read_aiddata(here("data", "statsys_ten.csv")) |>
+  read_csv(file = "data/statsys_ten.csv")
+
+
+df_oda_ten <- df_oda_ten |> 
   filter(`Type of Flow` == "ODA") |>
   filter(`Type of agreement` != "Rammeavtale") |>
   filter(Year %in% max(Year-9):max(Year)) |> 
@@ -131,3 +135,4 @@ df_dac_raw <- df_dac_raw |>
 # df_dac_raw <- left_join(x = df_dac_raw, y = df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
 
 rm(df_landreg_raw)
+
