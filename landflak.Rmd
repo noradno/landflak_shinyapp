@@ -47,7 +47,7 @@ ggnorad()
 
 ```
 
-```{r dataimport, eval=TRUE}
+```{r dataimport, eval=FALSE}
 # Velg eval=TRUE for å laste inn data ved å source scriptet import_data.R
 # NÅ er eval=FALSE for data lasted istedet inn  i app.r
 source("import_data.R")
