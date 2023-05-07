@@ -2,10 +2,11 @@
 title: "Bistand til `r params$land`"
 output: 
   word_document:
-    reference_docx: template/landflak_template_logo.docx
+    reference_docx: template/landflak_template.docx
+    number_sections: true
 
 params:
-  land: "Afghanistan" 
+  land: "Tanzania" 
 ---
 <!-- Scriptet forutsetter at scriptet kjøres via scriptet app.r. Velg eval=TRUE i chunk dataimport for at scriptet skal fungere separat -->
 
@@ -24,6 +25,7 @@ params:
 <!-- Sjekk: Hviterussland. Omtalen av største partnere peker på to partnere, men det var tre (men kun 2 med over 0 utbetalinger med 1 digit...) -->
 
 ```{r setup, include=FALSE}
+
 # Globale chunk options (gjelder alle chunks)
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
@@ -40,9 +42,12 @@ library(officer)
 library(janitor) 
 library(grid)
 library(gridExtra)
+library(noradplot)
+ggnorad()
+
 ```
 
-```{r dataimport, eval=FALSE}
+```{r dataimport, eval=TRUE}
 # Velg eval=TRUE for å laste inn data ved å source scriptet import_data.R
 # NÅ er eval=FALSE for data lasted istedet inn  i app.r
 source("import_data.R")
@@ -111,29 +116,25 @@ df_dac <- df_dac |>
                              as.character(round(usd_mill, digits = 0))))
 
 # Plot: internasjonal bistand ----
+
+h_spacing <- max(df_dac$usd_mill) * 1.1
+
 plot_dac <- ggplot(data = df_dac, aes(x = oecd_donor_no, y = usd_mill)) + 
-  geom_col(width = 0.8, fill = alpha("#23716D", 0.55), colour = alpha("#23716D", 1), lwd = 0.6) +
+  geom_col(fill = norad_pal("green")) +
   coord_flip(clip = "off") +
-  geom_text(aes(label = paste0(" ", barlabels, " ")), 
-            hjust = 'inward', size=3.3, family = "serif", colour = "#191919") +
-  annotate("text", x = 1, y = df_dac$usd_mill[[1]], hjust = 1, family = "serif", vjust = 0.5, size = 3.5,
-           label = paste0("Totalsum til landet fra DAC-giverland: ", vec_dac_totalsum, " mill. USD\n",
+  scale_y_continuous(expand=c(0, NA), limits = c(0, h_spacing)) +
+  geom_text(aes(label = paste0(" ", format(barlabels, big.mark = " "), " ")), 
+            hjust = 0) +
+  labs(title = paste0("St\u00f8rste giverland til ", params$land, " i ", vec_dac_maxyear),
+       subtitle = "\u00d8remerket ODA fra medlemsland i OECD DAC. Netto utbetalinger. USD mill.",
+       x = NULL, y = NULL) +
+  annotate("text", x = 1, y = h_spacing, hjust = 1, vjust = 0, size = 4,
+           label = paste0("Totalsum til landet fra DAC-giverland: ", format(vec_dac_totalsum, big.mark = " "), " mill. USD\n",
                           "Antall DAC-giverland til landet: ", vec_dac_donors_count)) +
-  labs(title = paste0("St\u00f8rste giverland til ", params$land, " i ", vec_dac_maxyear, ". USD mill."),
-       subtitle = "\u00d8remerket ODA fra medlemsland i OECD DAC (netto utbetalinger)") +
-  theme_minimal() +
-  theme(plot.title.position = 'plot', # Tittelposisjon helt til venstre i plottet
-        plot.title = element_text(size = 12, face = "italic"),
-        plot.subtitle = element_text(size = 10, face = "italic"),
-        plot.margin = margin(0,0,0,0, "cm"),
-        text=element_text(family = "serif"),
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y  = element_text(size = 11, colour = "#191919"),
-        axis.ticks.x = element_blank(),
-        axis.text.x  = element_blank(), 
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank())
+    theme(axis.ticks.y = element_blank(),
+          plot.title=element_text(size=16),
+          plot.subtitle=element_text(size=12, margin = ggplot2::margin(t = 0, b = 5)),
+          )
 
 # Fjerner overflødige objekter
 rm(df_dac)
@@ -146,7 +147,7 @@ I `r vec_dac_maxyear` var Norge det `r vec_dac_norway_rank` største giverlandet
 
 <!-- Printer plot -->
 
-```{r print-plot-internasjonal, dpi=500, fig.width = 5, fig.height=3}
+```{r print-plot-internasjonal, dpi=150, fig.width = 4, fig.height=2.4}
 plot_dac
 ```
 
@@ -218,43 +219,52 @@ vec_imp_maxyear <- max(df_imp$year)
 df_total_plot <- df_total |>
   group_by(year) |>
   arrange(year, desc(type_bistand)) |>
-  mutate(lab_ypos = cumsum(mill_nok) - 0.5 * mill_nok)
+  mutate(lab_ypos = cumsum(mill_nok) - 0.5 * mill_nok) |> 
+  ungroup()
 
 # Total-label posisjon: Totalsum over hver søyle
 df_total_plot_label <- df_total |>
   group_by(year) |>
   summarize(total = sum(mill_nok)) |>
-  round()
+  round() |> 
+  ungroup()
+
+# Sjekk om beregnet støtte er tilgjengelig for siste år
+v_lastyeartype <- df_total_plot |> 
+  filter(year == max(year)) |> 
+  pull(type_bistand) |> 
+  unique() |> 
+  length()
+
+# Fjerner totallabel på siste år hvis det ikke er beregnet kjernestøtte det året.
+if(v_lastyeartype == 1) {
+ df_total_plot_label <- df_total_plot_label |> 
+    filter(year != max(year))
+}
 
 # Plot: Stablet søylediagram med total-labels ----
 plot_total <- ggplot(data = df_total_plot, aes(x = year, y = mill_nok)) +
-  geom_col(aes(fill = type_bistand, colour = type_bistand), width = 0.7, lwd = 0.6) +
-  ylim(c(0, max(df_total_plot_label$total / 100 * 110))) + # Reduserer høyden på søylene for å få plass til total-labels på toppen
-  geom_text(aes(y = lab_ypos, label = round(mill_nok, digits = 0), group = type_bistand), color = "#191919", size = 3.2, family = "serif") +
-  geom_text(aes(year, total, label = total, fill = NULL, vjust =-0.5), data = df_total_plot_label, size = 3.2, family = "serif") + # Totalbeløp over søylene
-  scale_fill_manual(values = alpha(c("#C1872E", "#23716D"), 0.6)) +
-  scale_colour_manual(values = alpha(c("#C1872E", "#23716D"), 1)) +
-  theme_void() +
-  theme(axis.text.x= element_text(size = 9, angle = 0, vjust = 1, family = "serif"), # Få med årstall på søyler
-        text=element_text(family="serif"),
+  geom_col(aes(fill = type_bistand)) +
+  geom_text(aes(y = lab_ypos, label = round(mill_nok, digits = 0), group = type_bistand, colour = type_bistand), show.legend = F) +
+  geom_text(aes(year, total, label = format(total, big.mark = " "), fill = NULL, vjust = -1), data = df_total_plot_label) +
+  scale_fill_manual(values=c("#ffa274", "#03542d")) +
+  scale_colour_manual(values = c("black", "white")) + # Tekstfarge
+  labs(title = paste0("Bistand til ", params$land, ", ", vec_all_years[1],"-", vec_all_years[10]),
+       x = NULL, y = "Millioner kroner") +
+  theme(plot.title=element_text(size=16),
+        axis.text.x= element_text(size = 9, angle = 0, vjust = 1), # Få med årstall på søyler
         legend.position="bottom",
         legend.title = element_blank(),
         legend.text=element_text(size=11),
         legend.key.size = unit(0.3, "cm"),
-        plot.margin=unit(c(0.3, 0, 0.2, 0),"cm")) + # Legger til litt marg over og under plottet
+        axis.ticks.x = element_blank()
+        # plot.margin=unit(c(0.3, 0, 0.2, 0),"cm")
+        ) + # Legger til litt marg over og under plottet
   scale_x_continuous(breaks = vec_all_years[1]:vec_all_years[10]) + # Få med årstall på hver eneste søyle
+  scale_y_continuous(expand=c(0, NA), limits = c(0, max(df_total_plot_label$total / 100 * 120))) +
+  coord_cartesian(clip = "off") +
   guides(fill = guide_legend(reverse=TRUE),
          colour = guide_legend(reverse=TRUE))
-
-# Lager tittel som er justert helt til venstre i figuren. Lar seg ikke gjøre direkte i ggplot.
-title.grob <- textGrob(
-    label = paste0("Bistand til ", params$land, ", ", vec_all_years[1],"-", vec_all_years[10], ". NOK mill."),
-    x = unit(0, "lines"), 
-    y = unit(0, "lines"),
-    hjust = 0, vjust = 0, # Venstrejusterer tittelen
-    gp = gpar(fontsize = 12, fontface = "italic", fontfamily ="serif"))
-
-plot_total <- arrangeGrob(plot_total, top = title.grob)
 ```
 
 ```{r total-bistand-table}
@@ -267,14 +277,14 @@ df_total_tbl <- df_total |>
   janitor::adorn_totals(where = "row", fill = "-", na.rm = FALSE) |>
   
   # Avrunder beløp. Lave verdier får desimaler. Character-vektor godtar ulike antall desimaler
-  mutate(across(where(is.numeric), \(.) (if_else(abs(.) < 3, as.character(round(., digits = 1)), 
-                                 as.character(round(., digits = 0)))))) |>
+  mutate(across(where(is.numeric), \(.) (if_else(abs(.) < 3, as.character(format(round(., digits = 1), big.mark = " ")), 
+                                 as.character(format(round(., digits = 0), big.mark = " ")))))) |>
   
   # Erstatter punktum med komma i alle kolonner
   mutate(across(everything(), \(.) str_replace(.,"[.]",","))) |>
   
-  # Spesifisererer NA-verdier
-  mutate(across(everything(), \(.) replace_na(., "n.a."))) |>
+  # Spesifisererer NA-verdier som tomrom
+  mutate(across(everything(), \(.) replace_na(., " "))) |>
   
   # Endrer variabelnavn
   rename("Type bistand" = type_bistand)
@@ -292,10 +302,11 @@ table_total <- df_total_tbl |>
   #set_caption(caption = paste0("Bistand til ", params$land, " ", vec_all_years[1],"-", vec_all_years[10], ", fordelt på type bistand. NOK mill.")) |>
   add_header_lines(paste0("Bistand til ", params$land, " ", vec_all_years[1],"-", vec_all_years[10], ", fordelt på type bistand. NOK mill.")) |>
   font(fontname = "Cambria", part = "all") |>
-  fontsize(size = 11, part = "all") |>
-  fontsize(size = 12, part = "header", i = 1) |>
-  italic(part = "header", i = 1) |>
-  bg(bg = c("#afcbca", "#EED8AC"), part = "body", i = c(1,2)) # Fargelegger rader
+  fontsize(size = 9, part = "all") |>
+  fontsize(size = 11, part = "header", i = 1) |>
+  bold(part = "header", i = 1) |> 
+  # italic(part = "header", i = 1) |>
+  bg(bg = c("#b4eac9", "#ffa274"), part = "body", i = c(1,2)) # Fargelegger rader
 
 # Fjerner overflødige datasett
 rm(df_total)
@@ -348,10 +359,10 @@ I `r vec_earmarked_maxyear` utbetalte Norge `r vec_earmarked_maxyear_sum` millio
 
 <!-- Printer totalplot/totaltabell -->
 
-```{r total_bistand_print, fig.height = 2.1, fig.width = 5, dpi=500, ft.align = "left", ft.split = FALSE}
+```{r total_bistand_print, fig.height = 2.2, fig.width = 4, dpi=150, ft.align = "left", ft.split = FALSE}
 # Print enten figur eller tabell. Hvis det er stor forskjell mellom største beløp og og laveste beløp, så printes tabell.
 if (min(head(df_total_plot_label$total, n = -1)) / max(head(df_total_plot_label$total, n = -1)) > 0.2) {
-  grid.draw(plot_total) # Tegner grid.plot
+  plot_total
 } else {
   table_total # Tabell
 }
@@ -391,8 +402,8 @@ df_tema <- df_tema |>
 #Bruker character på beløp for at ikke alle beløp får like mange desimal.
 df_tema <- df_tema |>
   mutate(mill_nok_label = if_else(abs(mill_nok) < 3,
-                            as.character(round(mill_nok, digits = 1)),
-                            as.character(round(mill_nok, digits = 0))),
+                            as.character(format(round(mill_nok, digits = 1), big.mark = " ")),
+                            as.character(format(round(mill_nok, digits = 0), big.mark = " "))),
          prosent_label = if_else(abs(prosent * 100) < 3,
                            paste0(round(prosent * 100, digits = 1), " %"),
                            paste0(round(prosent * 100, digits = 0), " %")))
@@ -419,30 +430,19 @@ df_tema <- df_tema |>
 
 ## Plot ----
 plot_tema <- ggplot(df_tema, aes(x = reorder(target_area_no, mill_nok), y = mill_nok)) +
-  geom_col(width = 0.8, fill = alpha("#23716D", 0.55), colour = alpha("#23716D", 1), lwd = 0.6) +
-  coord_flip() +
-  geom_text(aes(label = barlabels), hjust = 'inward', size=3.2, family = "serif", colour = "#191919") +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 2, size = 5, face = 'italic', colour = "#191919"),
-    text=element_text(family = "serif"),
-    panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-    axis.ticks.y = element_blank(),
-    axis.text.y  = element_text(size = 11, colour = "#191919"),
-    axis.ticks.x = element_blank(),
-    axis.text.x  = element_blank(),
-    axis.title.x=element_blank(),
-    axis.title.y=element_blank())
-
-# Lager tittel som er justert helt til venstre i figuren. Lar seg ikke gjøre direkte i ggplot.
-title.grob <- textGrob(
-    label = paste0("Tematisk fordeling, \u00f8remerket bistand til ", params$land, " i ", vec_earmarked_maxyear),
-    x = unit(0, "lines"), 
-    y = unit(0, "lines"),
-    hjust = 0, vjust = 0, # Venstrejusterer tittelen
-    gp = gpar(fontsize = 12, fontface = "italic", fontfamily ="serif"))
-
-plot_tema <- arrangeGrob(plot_tema, top = title.grob)
+  geom_col(width = 0.8, fill = norad_pal("green")) +
+  coord_flip(clip = "off") +
+  scale_y_continuous(expand=c(0, NA), limits = c(0, max(df_tema$mill_nok / 100 * 180))) +
+  geom_text(aes(label = barlabels), hjust = 0) +
+  labs(title = "Tematisk fordeling",
+       subtitle = paste0("\u00d8remerket bistand til ", params$land, " i ", vec_earmarked_maxyear, ". Millioner kroner"), x = NULL, y = NULL) +
+  theme(plot.title=element_text(size=16),
+        plot.subtitle=element_text(size=12, margin = ggplot2::margin(t = 0, b = 5)),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line.y = element_blank())
 
 # Til tekst: største tema
 vec_tema_top <- case_when(
@@ -471,8 +471,8 @@ I `r vec_earmarked_maxyear` var `r vec_tema_omtale` den øremerkede bistanden ti
 
 <!-- Printer temaplot -->
 
-```{r tema_plot_print, fig.height = (nrow(df_tema) / 3.1) + 0.7 / nrow(df_tema), dpi = 500}
-grid.draw(plot_tema) # Dette er måten å tegne grid.plot
+```{r tema_plot_print, fig.height = 2.2, fig.width = 4, dpi = 150}
+plot_tema
 ```
 
 ```{r partnertype}
@@ -506,8 +506,8 @@ df_partnertype <- df_partnertype |>
 #Bruker character på beløp for at ikke alle beløp får like mange desimal.
 df_partnertype <- df_partnertype |>
   mutate(mill_nok_label = if_else(abs(mill_nok) < 3,
-                                  as.character(round(mill_nok, digits = 1)),
-                                  as.character(round(mill_nok, digits = 0))),
+                                  as.character(format(round(mill_nok, digits = 1), big.mark = " ")),
+                                  as.character(format(round(mill_nok, digits = 0), big.mark = " "))),
          prosent_label = if_else(abs(prosent * 100) < 3,
                                  paste0(round(prosent * 100, digits = 1), " %"),
                                  paste0(round(prosent * 100, digits = 0), " %")))
@@ -534,31 +534,20 @@ df_partnertype <- df_partnertype |>
   mutate(barlabels = str_replace_all(barlabels,"[.]",","))
 
 ## Plot ----
-plot_partnertype <- ggplot(data = df_partnertype, aes(x = reorder(partner_group_visual_no, mill_nok), y = mill_nok)) +
-  geom_col(width = 0.8, fill = alpha("#23716D", 0.55), colour = alpha("#23716D", 1), lwd = 0.6) +
-  coord_flip() +
-  geom_text(aes(label = barlabels), hjust = 'inward', size=3.2, family = "serif", colour = "#191919") +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 2, size = 5, face = 'italic', colour = "#191919"),
-    text=element_text(family = "serif"),
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y  = element_text(size = 11, colour = "#191919"),
+plot_partnertype <- ggplot(df_partnertype, aes(x = reorder(partner_group_visual_no, mill_nok), y = mill_nok)) +
+  geom_col(width = 0.8, fill = norad_pal("green")) +
+  coord_flip(clip = "off") +
+  scale_y_continuous(expand=c(0, NA), limits = c(0, max(df_partnertype$mill_nok / 100 * 180))) +
+  geom_text(aes(label = barlabels), hjust = 0) +
+  labs(title = "Type partner",
+       subtitle = paste0("\u00d8remerket bistand til ", params$land, " i ", vec_earmarked_maxyear, ". Millioner kroner"), x = NULL, y = NULL) +
+  theme(plot.title=element_text(size=16),
+        plot.subtitle=element_text(size=12, margin = ggplot2::margin(t = 0, b = 5)),
+        axis.text.x = element_blank(),
         axis.ticks.x = element_blank(),
-        axis.text.x  = element_blank(),
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank())
-
-# Lager tittel som er justert helt til venstre i figuren. Lar seg ikke gjøre direkte i ggplot.
-title.grob <- textGrob(
-    label = paste0("Type partner, \u00f8remerket bistand til ", params$land, " i ", vec_earmarked_maxyear),
-    x = unit(0, "lines"), 
-    y = unit(0, "lines"),
-    hjust = 0, vjust = 0, # Venstrejusterer tittelen
-    gp = gpar(fontsize = 12, fontface = "italic", fontfamily ="serif"))
-
-plot_partnertype <- arrangeGrob(plot_partnertype, top = title.grob)
+        axis.line.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line.y = element_blank())
 
 # Til tekst: Største partnertyper: Betinget på antall kategorier (mer enn 2, 2 eller 1)
 vec_partnertype_top <- case_when(
@@ -586,8 +575,8 @@ I `r vec_earmarked_maxyear` ble `r vec_partnergruppe_omtale` den øremerkede bis
 
 <!-- Printer partnertype plot -->
 
-```{r partnertype_plot_print, fig.height = (nrow(df_partnertype) / 3) + 0.8 / nrow(df_partnertype), dpi = 500}
-grid.draw(plot_partnertype) # Dette er måten å tegne grid.plot
+```{r partnertype_plot_print, fig.height = 2.2, fig.width = 4, dpi = 150}
+plot_partnertype
 ```
 
 ```{r partnerdata}
@@ -651,11 +640,12 @@ table_df_partner <- df_partner |>
   hrule(rule = "exact", part = "all") |> #Justerer radhøyde
   add_header_lines(paste0("Avtalepartnere, \u00f8remerket bistand til ", params$land, " i ", max(df_oda_ten$year))) |>
   font(fontname = "Cambria", part = "all") |>
-  fontsize(size = 11, part = "all") |>
-  fontsize(size = 12, part = "header", i = 1) |>
-  italic(part = "header", i = 1) |>
-  bg(bg = "#eff4f4", part = "body", i = seq(1, nrow(df_partner)-1)) |>
-  bg(bg = "#afcbca", part = "body", i = seq(1, nrow(df_partner)-1, 2)) # Fargelegger annenhver rad minus totalraden
+  fontsize(size = 9, part = "all") |>
+  fontsize(size = 11, part = "header", i = 1) |>
+  bold(part = "header", i = 1) |> 
+  # italic(part = "header", i = 1) |>
+  bg(bg = "white", part = "body", i = seq(1, nrow(df_partner)-1)) |>
+  bg(bg = "#b4eac9", part = "body", i = seq(1, nrow(df_partner)-1, 2)) # Fargelegger annenhver rad minus totalraden
 
 # Til tekst: Største partnere ----
 df_partner_tekst <- df_partner |>
@@ -756,11 +746,12 @@ table_imp_org <- df_imp_org |>
   hrule(rule = "exact", part = "all") |> #Justerer radhøyde
   add_header_lines(paste0("Avtalepartnere, beregnet multilateral kjernest\u00f8tte til ", params$land, " i ", vec_imp_org_maxyear)) |>
   font(fontname = "Cambria", part = "all") |>
-  fontsize(size = 11, part = "all") |>
-  fontsize(size = 12, part = "header", i = 1) |>
-  italic(part = "header", i = 1) |>
-  bg(bg = "#FBF7EE", part = "body", i = seq(1, nrow(df_imp_org)-1)) |>
-  bg(bg = "#EED8AC", part = "body", i = seq(1, nrow(df_imp_org)-1, 2)) # Fargelegger annenhver rad minus totalraden
+  fontsize(size = 9, part = "all") |>
+  fontsize(size = 11, part = "header", i = 1) |>
+  bold(part = "header", i = 1) |> 
+  # italic(part = "header", i = 1) |>
+  bg(bg = "white", part = "body", i = seq(1, nrow(df_imp_org)-1)) |>
+  bg(bg = "#ffa274", part = "body", i = seq(1, nrow(df_imp_org)-1, 2)) # Fargelegger annenhver rad minus totalraden
 
 # Til tekst: største partnere ----
 # Datasett som utelater total-raden
