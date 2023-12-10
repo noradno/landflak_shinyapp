@@ -13,7 +13,7 @@ library(here)
 
 # Kilde A: Bistandsstatistikk 10 år (oda_ten)
 df_oda_ten <- 
-  read_csv(file = "data/statsys_ten.csv")
+  noradstats::read_aiddata("data/statsys_ten.csv")
 
 
 df_oda_ten <- df_oda_ten |> 
