@@ -6,7 +6,7 @@ output:
     number_sections: true
 
 params:
-  land: "Tanzania" 
+  land: "Mexico" 
 ---
 <!-- Scriptet forutsetter at scriptet kjøres via scriptet app.r. Velg eval=TRUE i chunk dataimport for at scriptet skal fungere separat -->
 
@@ -734,6 +734,12 @@ df_imp_org <- df_imp_org |>
   rename("NOK mill" = mill_nok)
 
 # Tabell----
+
+# Create table if the table has rows (more than totalrow)
+valid_table_imp_org <- nrow(df_imp_org) > 1
+
+if(valid_table_imp_org) {
+
 table_imp_org <- df_imp_org |>
   flextable() |>
   align(align = "left", j = colnames(df_imp_org)[1], part = "all") |> # Venstrejusterer første kolonne
@@ -752,6 +758,7 @@ table_imp_org <- df_imp_org |>
   # italic(part = "header", i = 1) |>
   bg(bg = "white", part = "body", i = seq(1, nrow(df_imp_org)-1)) |>
   bg(bg = "#ffa274", part = "body", i = seq(1, nrow(df_imp_org)-1, 2)) # Fargelegger annenhver rad minus totalraden
+}
 
 # Til tekst: største partnere ----
 # Datasett som utelater total-raden
@@ -794,7 +801,9 @@ Tabellen under viser organisasjonsfordelingen av beregnet norsk multilateral kje
 <!-- Printer partnertabell -->
 
 ```{r imputed_org_table_print, ft.align = "left"}
+if(valid_table_imp_org) {
 table_imp_org
+}
 ```
 
 ```{r timestamp}

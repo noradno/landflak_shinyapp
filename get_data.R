@@ -4,6 +4,7 @@
 # Loading packages
 library(googledrive)
 library(purrr)
+library(noradstats)
 
 # Connecting to noradstats google drive
 googledrive::drive_auth(email = "noradstats@gmail.com")
@@ -12,8 +13,7 @@ googledrive::drive_auth(email = "noradstats@gmail.com")
 googledrive::drive_find()
 
 # Selecting files to download
-files <- c("statsys_ten.csv",
-           "land_og_regioner.csv",
+files <- c("land_og_regioner.csv",
            "imputed_multi_land_org.csv",
            "exchangerate.csv")
 
