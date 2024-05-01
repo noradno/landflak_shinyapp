@@ -5,7 +5,7 @@ library(tidyverse)
 library(here)
 
 # Spesifiserer år
-vec_endyear <- 2021
+vec_endyear <- 2022
 vec_startyear <- vec_endyear - 9
 
 # Her brukes OECD-datasettet TABLE2A inkludert metadata.
