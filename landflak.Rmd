@@ -6,7 +6,7 @@ output:
     number_sections: true
 
 params:
-  land: "Mexico" 
+  land: "Ukraina" 
 ---
 <!-- Scriptet forutsetter at scriptet kjøres via scriptet app.r. Velg eval=TRUE i chunk dataimport for at scriptet skal fungere separat -->
 
@@ -261,7 +261,7 @@ plot_total <- ggplot(data = df_total_plot, aes(x = year, y = mill_nok)) +
         # plot.margin=unit(c(0.3, 0, 0.2, 0),"cm")
         ) + # Legger til litt marg over og under plottet
   scale_x_continuous(breaks = vec_all_years[1]:vec_all_years[10]) + # Få med årstall på hver eneste søyle
-  scale_y_continuous(expand=c(0, NA), limits = c(0, max(df_total_plot_label$total / 100 * 120))) +
+  scale_y_continuous(expand=c(0, NA), limits = c(0, max(df_total_plot$mill_nok / 100 * 120))) +
   coord_cartesian(clip = "off") +
   guides(fill = guide_legend(reverse=TRUE),
          colour = guide_legend(reverse=TRUE))
@@ -787,12 +787,12 @@ vec_imp_org_omtale <- case_when(
   length(unique(df_imp_org_text$Avtalepartner)) == 1 ~ "Partneren")
 ```
 
-OECDs beregninger tilsier at `r params$land` mottok `r vec_imp_maxyear_sum` millioner kroner av Norges kjernestøtte til multilaterale organisasjoner i `r vec_imp_maxyear`[^3].
+OECDs beregninger tilsier at `r params$land` mottok `r vec_imp_maxyear_sum` millioner kroner av Norges kjernestøtte til multilaterale organisasjoner i `r vec_imp_maxyear`[^3]. Nyere beregninger fordelt på organisasjon er ikke tilgjengelig per i dag.
 <!-- `r vec_earmarked_maxyear`-beregninger er ikke tilgjengelige per i dag. -->
 
 [^3]: På grunn av avrundinger i OECDs beregninger kan det være noe avvik mellom totalbeløpet på multilateral kjernestøtte til landet i `r vec_imp_org_maxyear` i denne tabellen og på forsiden.
 
-Tabellen under viser organisasjonsfordelingen av beregnet norsk multilateral kjernestøtte til `r params$land` i `r vec_imp_org_maxyear`[^4]. Nyere beregninger fordelt på organisasjon er ikke tilgjengelig per i dag.
+Tabellen under viser organisasjonsfordelingen av beregnet norsk multilateral kjernestøtte til `r params$land` i `r vec_imp_org_maxyear`[^4].
 
 [^4]: OECDs landfordelte beregninger omfatter kjernestøtte til de største, men ikke alle multilaterale organisasjoner. Om lag 90 prosent av multilateral kjernestøtte fra DAC-land inngår i OECDs landfordelte beregninger. Tabellen gir dermed ikke en fullstendig oversikt over beregnet kjernestøtte til mottakerlandet for alle multilaterale organisasjoner Norge støtter.
 

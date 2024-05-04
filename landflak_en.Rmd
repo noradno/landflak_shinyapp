@@ -261,7 +261,7 @@ plot_total <- ggplot(data = df_total_plot, aes(x = year, y = mill_nok)) +
         # plot.margin=unit(c(0.3, 0, 0.2, 0),"cm")
         ) + # Legger til litt marg over og under plottet
   scale_x_continuous(breaks = vec_all_years[1]:vec_all_years[10]) + # Få med årstall på hver eneste søyle
-  scale_y_continuous(expand=c(0, NA), limits = c(0, max(df_total_plot_label$total / 100 * 120))) +
+  scale_y_continuous(expand=c(0, NA), limits = c(0, max(df_total_plot$mill_nok / 100 * 120))) +
   coord_cartesian(clip = "off") +
   guides(fill = guide_legend(reverse=TRUE),
          colour = guide_legend(reverse=TRUE))
