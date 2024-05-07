@@ -87,8 +87,8 @@ ui <- secure_app(ui,
                  tags_bottom = tags$div(
                    tags$p("Ved spørsmål om innlogging, kontakt ",
                           tags$a(
-                            href = "mailto:statistikk@norad.no",
-                            target="_top", "statistikk@norad.no")),
+                            href = "mailto:norad-statistikk.og.analyse@norad.no",
+                            target="_top", "Seksjon for Statistikk og analyse")),
                    tags$img(src = "norad_logo_black_small_rgb_micro.png")
                    )
                  )

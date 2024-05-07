@@ -22,4 +22,4 @@ Eksterne kan henvises til [bistandsresultater.no](https://resultater.norad.no/no
 
 **Spørsmål?**
 
-Landflakene er utarbeidet av Norads seksjon for Statistikk og analyse. Ved spørsmål, ta kontakt med seksjonen: [statistikk@norad.no](mailto:statistikk@norad.no)
+Landflakene er utarbeidet av Norads seksjon for Statistikk og analyse. Ved spørsmål, ta kontakt med seksjonen: [Seksjon for Statistikk og analyse](mailto:norad-statistikk.og.analyse@norad.no)
