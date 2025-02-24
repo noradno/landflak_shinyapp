@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+config.yml
 /data/
 landflak.docx
 landflak_en.docx

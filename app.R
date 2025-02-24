@@ -18,6 +18,7 @@ library(shinymanager)
 library(shinythemes)
 library(dplyr)
 library(markdown)
+library(config)
 
 # Laster inn data i global environment ved å source scriptet import_data.R ---
 source("import_data.R")
@@ -98,10 +99,10 @@ server <- function(input, output) {
     
     # Passordbeskyttelse: Sjekker credentials for å godkjenne innlogging
     res_auth <- secure_server(
-        check_credentials = check_credentials(data.frame(
-            user = "landflak",
-            password = "landflak321",
-            stringsAsFactors = FALSE))
+      check_credentials = check_credentials(data.frame(
+        user = config::get("credentials")$user,
+        password = config::get("credentials")$password,
+        stringsAsFactors = FALSE))
     )
     
     output$report <- downloadHandler(

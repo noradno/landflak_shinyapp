@@ -5,9 +5,7 @@ account: noradstats
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 9042634
-bundleId: 7185066
+bundleId: 9849118
 url: https://noradstats.shinyapps.io/landflak-test/
-when: 1683466417.7596
-lastSyncTime: 1683466417.75962
 asMultiple: FALSE
 asStatic: FALSE
