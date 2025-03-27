@@ -4,7 +4,7 @@
 
 # Appens server kjører scriptet landflak.Rmd når bruker har valgt landparameter på nettsiden (ui)
 
-# Pakken noradstats må reinstalleres ved ny last til shinyapps.io: devtools::install_github("noradno/noradstats")
+# Pakken noradstats og noradplot må reinstalleres ved ny last til shinyapps.io: remotes::install_github("noradno/noradstats") og remotes::install_github("noradno/noradplot")
 # Husk at alle filer skal inkluderes (inkl. word-template) når appen publiseres til shinyapps.io
 
 
@@ -21,12 +21,10 @@ library(markdown)
 library(config)
 
 # Laster inn data i global environment ved å source scriptet import_data.R ---
-source("import_data.R")
+load(here::here("data_final", "landflak_datasets.rda"))
 
 # Country list for user input
 select_country <- df_oda_ten |>
-  filter(type_of_flow == "ODA") |>
-  filter(type_of_agreement != "Rammeavtale") |>
   filter(income_category != "Unspecified") |>
   filter(year == max(year)) |>
   group_by(recipient_country_no_visual) |>
@@ -37,7 +35,6 @@ select_country <- df_oda_ten |>
   select(recipient_country_no_visual) |>
   arrange() |>
   pull()
-
 
 # Shiny app ----
 
