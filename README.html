@@ -376,7 +376,7 @@ forrige rapporteringsår.</li>
 <li>Appen bygges med scriptet <em>app.R</em>, som spesifiserer både ui
 (front-end) og server (back-end).</li>
 <li>Appen publiseres på en nettside på følgende URL: <a href="https://noradstats.shinyapps.io/landflak/" class="uri">https://noradstats.shinyapps.io/landflak/</a>. I tillegg er
-dev-portal på følgende URL: <a href="https://noradstats.shinyapps.io/landflak-dev/" class="uri">https://noradstats.shinyapps.io/landflak-dev/</a>.</li>
+dev-portal og test-portal på følgende URL: <a href="https://noradstats.shinyapps.io/landflak-dev/" class="uri">https://noradstats.shinyapps.io/landflak-dev/</a> <a href="https://noradstats.shinyapps.io/landflak-test/" class="uri">https://noradstats.shinyapps.io/landflak-test/</a></li>
 <li>Appen er versjonskontrollert, for å holde kontroll på versjon av R
 og pakkene.</li>
 </ul>
@@ -384,47 +384,48 @@ og pakkene.</li>
 <div id="rutine-ved-oppdatering-av-datakilder" class="section level3">
 <h3>Rutine ved oppdatering av datakilder</h3>
 <ol style="list-style-type: decimal">
-<li>Det er kun datakildene på noradstats google drive som trengs å
-oppdateres. Legg derfor inn oppdaterte datafiler i <em>noradstats google
-drive</em>, og vær oppmerksom på å bruke like filnavn og variabelnavn
-som forrige filversjoner. Slett gamle filer, slik at det ikke er flere
-filer med samme navn. Ingen scripts eller andre filer skal endres når
-datakildene oppdateres.</li>
-<li>Kjør scriptet <em>get_data.R</em> for å laste ned csv-filer fra
-<em>noradstats google drive</em>. Filene lagres i mappen /data.</li>
-<li>Kjør scriptet <em>get_data_donors</em> for å hente data fra OECDs
-API på DAC-lands ODA til enkeltland. Filen lagres som csv i mappen
-/data. Husk å oppdater årstall for årgang i starten av scriptet for at
-nyeste data skal hentes.</li>
-<li>Kjør scriptet <em>get_data_imputed</em> for å hente data fra OECDs
-API på Norsk beregnet imputert kjernestøtte til enkeltland. Lagres som
-csv i mappen /data. Husk å oppdater årstall for årgang i starten av
-scriptet for at nyeste data skal hentes.</li>
+<li>Oppdater datafilene i mappen data_raw_and_processed/raw. Slett gamle
+filversjoner, slik at det ikke er flere filer med samme navn.</li>
+<li>Kjør scriptet <em>01_get_data_donors.R</em> for å hente data fra
+OECDs API på DAC-lands ODA til enkeltland. Lagres automatisk som csv i
+mappen data_raw_and_processed/processed. Husk å oppdater årstall for
+årgang i starten av scriptet for at nyeste data skal hentes.</li>
+<li>Kjør scriptet <em>02_get_data_imputed.R</em> for å hente data fra
+OECDs API på Norsk beregnet imputert kjernestøtte til enkeltland. Lagres
+automatisk som csv i mappen data_raw_and_processed/processed. Husk å
+oppdater årstall for årgang i starten av scriptet for at nyeste data
+skal hentes.</li>
+<li>Kjør scriptet <em>03_create_final_data.R</em> for å hente offisielle
+norsk bistandstatistikk for bistand til enkeltland og bearbeide alle
+datakilder til bruk i landflaket. Resultatet er 5 data frames som lagres
+i 1 rda-fil i mappen data_final.</li>
 <li>Oppdater alle pakker og R-versjonen før opplasting til
-<em>shinyapps.io</em>. Viktig å av- og reinnstallere pakken noradstats
-via <em>devtools::install_github(“einartornes/noradstats”)</em>. Det
-skyldes at noradstats har dependencies til en rekke andre pakker, og gir
+<em>shinyapps.io</em>. Viktig å av- og reinnstallere pakkene noradstats
+og noradplots via <em>remotes::install_github(“noradno/noradstats”)</em>
+og <em>remotes::install_github(“noradno/noradplot”)</em>. Det skyldes at
+disse pakkene har dependencies til en rekke andre pakker, og gir
 feilmelding uten reinnstallasjon.</li>
 <li>Kjør scriptet <em>app.R</em> for å teste at den fungerer med
 oppdaterte datasett.</li>
 <li>Appen publiseres til <em>shinyapps.io</em> gjennom Rstudios
-<em>Publish the application or document</em> til følgende URL: <a href="https://noradstats.shinyapps.io/landflak/" class="uri">https://noradstats.shinyapps.io/landflak/</a>. Merk at
-<em>alle</em> filene skal publiseres på shinyapps.io, inkludert
-word-template, som ikke alltid er huket av som default ved
-opplasting.</li>
+<em>Publish the application or document</em> til følgende URL: <a href="https://noradstats.shinyapps.io/landflak/" class="uri">https://noradstats.shinyapps.io/landflak/</a>. Man velger
+hvilke filer som skal publiseres på shinyapps.io, og pass på at alle
+filer/mapper med viktig unntak av mappen data_raw_and_processed og
+eventuelle genererte word-dokumenter.</li>
 <li>Vanlige feilkilder ved publisering:
 <ul>
 <li><p>Feil 1: Appen publiseres ikke: Appen publiseres ikke, dvs. man
 får en feilmelding når man går til <a href="https://noradstats.shinyapps.io/landflak/" class="uri">https://noradstats.shinyapps.io/landflak/</a>. Sjekk loggen
-for appen på shinyapps.io for å se hvor i koden det har gått galt.
-Typiske feil er at det er en pakke den ikke finner (og må legges inn med
-library(), eller at pakkene ikke er oppdaterte.</p></li>
+for appen på shinyapps.io (<a href="mailto:noradstats@gmail.com" class="email">noradstats@gmail.com</a> er brukernavn). for å se hvor i
+koden det har gått galt. Typiske feil er at det er en pakke den ikke
+finner (og må legges inn med library(), eller at pakkene ikke er
+oppdaterte.</p></li>
 <li><p>Feil 2: Appen publiseres, slik at man kan logge inn i portalen,
 men når man genererer landflak, så får man ikke word-filer, men filer
 som heter “report.html” og beskjed om at det var mislykket. Denne feilen
 er vanskeligere å identifisere hva skyldes, fordi det ikke fremgår av
-loggen på shinyapps.io. En typisk feil er at fila word-template ikke er
-blitt med i opplastingen til shinyapps.io.</p></li>
+loggen på shinyapps.io. En typisk feil er at fila word-template-filen
+ikke er blitt med i opplastingen til shinyapps.io.</p></li>
 </ul></li>
 </ol>
 </div>
@@ -443,26 +444,25 @@ Word-format</em>).</li>
 land (parameter) når bruker trykker action-button, og laster ned
 filen.</li>
 </ul></li>
-<li><p><em>get_data.R:</em> Script for å laste ned alle datasett fra
-<em>noradstats google drive</em>. Må kjøres før appen kjøres
-(app.R).</p></li>
-<li><p><em>get_data_donors.R:</em> Script for hente donordata fra OECDs
-API. Må kjøres før appen kjøres (app.R). Øremerket bistand fra
+<li><p><em>01_get_data_donors.R:</em> Script for hente donordata fra
+OECDs API. Må kjøres før appen kjøres (app.R). Øremerket bistand fra
 medlemsland i OECD DAC siste rapporteringsår, avgrenset til enkeltland
 som har mottatt øremerket bistand fra Norge. Kilde: OECDs
 statistikkdatabase (<em>DAC2a</em>).</p></li>
-<li><p><em>get_data_imputed.R:</em> Script for hente imputed-data fra
+<li><p><em>02_get_data_imputed.R:</em> Script for hente imputed-data fra
 OECDs API. Må kjøres før appen kjøres (app.R). Beregnet norsk
 multilateral kjernestøtte til mottakerland siste ti år, avgrenset til
 land som har mottatt øremerket bistand fra Norge de ti aktuelle årene
 Kilde: OECDs statistikkdatabase (<em>DAC2a</em>). Scriptet henter også
 vekslingskurs fra USD-NOK for å få norske beløp på
 beregningene.</p></li>
-<li><p><em>import_data.R</em>: Script for å laste inn data fra mappen
-<em>data/</em>. Scriptet sources (kjøres) i scriptet <em>app.R</em>.
-Scriptet inkluderer også landnavn-kolonnen
-<em>recipient_country_no_visual</em> i alle datafilene, som er de
-visuelle landnavnene tilsvarende i bistandsresultater.no</p></li>
+<li><p><em>03_create_final_data.R</em>: Script for å hente offisiell
+norsk bistandstatistikk for bistand til enkeltland og bearbeide alle
+datakilder til bruk i landflaket. Scriptet inkluderer også
+landnavn-kolonnen <em>recipient_country_no_visual</em> i alle
+datafilene, som er de visuelle landnavnene tilsvarende i
+bistandsresultater.no. Resultatet er 5 data frames som lagres i 1
+rda-fil i mappen data_final.</p></li>
 <li><p><em>landflak.Rmd</em>: Scriptet genererer landflaket. Det er en
 parametrisert rapport i word-format med ett brukervalgt parameter:
 mottakerland. Scriptet kjøres i server-spesifiseringen i scriptet
@@ -472,28 +472,35 @@ mottakerland. Scriptet kjøres i server-spesifiseringen i scriptet
 </div>
 <div id="datafiler" class="section level4">
 <h4>Datafiler</h4>
+<p>Til info: Grunnen til at data_raw_and_processd og data_final er i to
+separate mapper i project directory er at det er enklere å velge hvilke
+datafiler som skal inkluderes ved publisering til shinyapps.io, for kun
+filene i data_final skal deployes dit.</p>
 <ul>
-<li><p>Datafiler legges inn i <em>noradstats google drive</em> (logg inn
-via gmail). Datafilene dekker ulike tidsrom og er basert på ulike
-datakilder.</p>
+<li>Datafiler legges inn i mappen data_raw_and_processed/raw. Datafilene
+dekker ulike tidsrom og er basert på ulike datakilder.
 <ul>
-<li><em>statsys_ten.csv</em>: Norsk bistandsstatistikk siste ti år i
-csv-format. Kilde: Norsk bistandsstatistikk (statsys-uttrekk) siste ti
-år, ekskludert kolonnen <em>Programme officer.</em></li>
-<li><em>imputed_multil_land_org.csv</em>: Beregnet norsk multilateral
-kjernestøtte til mottakerland per organisasjon siste år, avgrenset til
-land som har mottatt øremerket bistand fra Norge det aktuelle året .
-Kilde: Tilsendes fra OECD DCD over epost, finnes ikke på OECDs API.</li>
 <li><em>land_og_regioner.csv</em>: Bro-tabell med visuelle landnavn
 tilsvarende bistandsresultater.no, for å kunne linke til aktuell
 landside i bistandsresultater. Kilde: <em>land_og_regioner.xlsx</em> fra
-siste datalast til <em>bistandsresultater.no</em></li>
-<li>exchangerate.csv: Vekslingskurser USD-NOK tilgjengelig på excelfil
-hos OECD: <a href="https://www.oecd.org/dac/financing-sustainable-development/development-finance-data/">Development
+siste datalast til <em>bistandsresultater.no</em>. Denne brukes også ved
+datalast til bistandsresultater.no, så bruk den samme fila her.</li>
+<li><em>exchangerate.csv</em>: Vekslingskurser USD-NOK tilgjengelig på
+excelfil hos OECD: <a href="https://www.oecd.org/dac/financing-sustainable-development/development-finance-data/">Development
 finance data - OECD</a>: <a href="https://www.oecd.org/dac/financing-sustainable-development/development-finance-data/Exchange-rates.xls" class="uri">https://www.oecd.org/dac/financing-sustainable-development/development-finance-data/Exchange-rates.xls</a>
 Vi kan ikke bruke OECDs offisielle vekslingskurser i deres database-API,
 men istedet bruke bistandsrelevante vekslingskurser herfra som låses i
 april hvert år.</li>
+<li><em>crs_donors_code.csv</em>: En liste med to kolonner:
+crs_donors_code og iso_code. Vi trenger iso_code for donorland fordi
+iso_code brukes i OECDs APIer i scriptene 01_get_data_donors.R og
+02_get_data_imputed.R. Datakilde er <a href="https://web-archive.oecd.org/temp/2024-06-19/57753-dacandcrscodelists.htm">OECDs
+kodeoversikt</a></li>
+<li><em>crs_recipients_code.csv</em>: En liste med to kolonner:
+crs_recipients_code og iso_code. Vi trenger iso_code for mottakerland
+fordi iso_code brukes i OECDs APIer i scriptene 01_get_data_donors.R og
+02_get_data_imputed.R. Datakilde er <a href="https://web-archive.oecd.org/temp/2024-06-19/57753-dacandcrscodelists.htm">OECDs
+kodeoversikt</a></li>
 </ul></li>
 </ul>
 </div>
