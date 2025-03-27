@@ -39,18 +39,17 @@ library(forcats)
 library(readxl)
 library(flextable)
 library(officer)
-library(janitor) 
+library(janitor)
 library(grid)
 library(gridExtra)
 library(noradplot)
 ggnorad()
-
 ```
 
-```{r dataimport, eval=FALSE}
+```{r dataimport, eval=TRUE}
 # Velg eval=TRUE for å laste inn data ved å source scriptet import_data.R
 # NÅ er eval=FALSE for data lasted istedet inn  i app.r
-source("import_data.R")
+load(here::here("data_final", "landflak_datasets.rda"))
 ```
 
 
@@ -159,9 +158,7 @@ plot_dac
 # Datasett på total øremerket bistand. Spesifiserer kolonne "Type bistand"
 df_earmarked <- df_oda_ten |>
   filter(recipient_country_no_visual == params$land,
-         type_of_flow == "ODA",
-         year >= max(year)-9,
-         type_of_agreement != "Rammeavtale") |>                 
+         year >= max(year)-9) |> 
   group_by(year) |>
   summarise(mill_nok = sum(disbursed_mill_nok)) |>
   add_column(type_bistand = "\u00d8remerket bistand", .before = 1 ) |>
@@ -249,7 +246,7 @@ plot_total <- ggplot(data = df_total_plot, aes(x = year, y = mill_nok)) +
   geom_text(aes(year, total, label = format(total, big.mark = " "), fill = NULL, vjust = -1), data = df_total_plot_label) +
   scale_fill_manual(values=c("#ffa274", "#03542d")) +
   scale_colour_manual(values = c("black", "white")) + # Tekstfarge
-  labs(title = paste0("Bistand til ", params$land, ", ", vec_all_years[1],"-", vec_all_years[10]),
+  labs(title = paste0("Bistand til ", params$land, ", ", min(vec_all_years),"-", max(vec_all_years)),
        x = NULL, y = "Millioner kroner") +
   theme(plot.title=element_text(size=16),
         axis.text.x= element_text(size = 9, angle = 0, vjust = 1), # Få med årstall på søyler
@@ -260,7 +257,7 @@ plot_total <- ggplot(data = df_total_plot, aes(x = year, y = mill_nok)) +
         axis.ticks.x = element_blank()
         # plot.margin=unit(c(0.3, 0, 0.2, 0),"cm")
         ) + # Legger til litt marg over og under plottet
-  scale_x_continuous(breaks = vec_all_years[1]:vec_all_years[10]) + # Få med årstall på hver eneste søyle
+  scale_x_continuous(breaks = seq(min(vec_all_years), max(vec_all_years), by = 1)) + # Få med årstall på hver eneste søyle
   scale_y_continuous(expand= expansion(c(0, 0.2))) +
   coord_cartesian(clip = "off") +
   guides(fill = guide_legend(reverse=TRUE),
@@ -377,8 +374,6 @@ rm(df_total_plot_label)
 # Datasett på øremerket bistand fordelt på tema. Inkluderer prosentkolonne
 df_tema <- df_oda_ten |>
   filter(recipient_country_no_visual == params$land,
-         type_of_flow == "ODA",
-         type_of_agreement != "Rammeavtale",
          year == max(year)) |>                 
   group_by(target_area_no) |>
   summarise(mill_nok = sum(disbursed_mill_nok)) |>
@@ -479,8 +474,6 @@ plot_tema
 # Datasett på øremerket bistand fordelt på partnertype. Inkluderer prosentkolonne
 df_partnertype <- df_oda_ten |>
   filter(recipient_country_no_visual == params$land,
-         type_of_flow == "ODA",
-         type_of_agreement != "Rammeavtale",
          year == max(year)) |>
   group_by(partner_group_visual_no) |>
   summarise(mill_nok = sum(disbursed_mill_nok)) |> 
@@ -583,8 +576,6 @@ plot_partnertype
 # Datasett på øremerket bistand fordelt på enkeltpartner
 df_partner <- df_oda_ten|>
   filter(recipient_country_no_visual == params$land, # Definerer land med parameter
-         type_of_flow == "ODA",
-         type_of_agreement != "Rammeavtale",
          year == max(year)) |> 
   group_by(agreement_partner) |>
   summarise(mill_nok = sum(disbursed_mill_nok)) |>
