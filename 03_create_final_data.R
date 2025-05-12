@@ -13,8 +13,16 @@ library(here)
 # Load, process and write oda_ten.csv and oda_countries.csv to data/processed directory
 
 # Kilde A: Bistandsstatistikk 10 år (oda_ten)
-df_oda_ten <- noradstats::access_oda() |> 
-  filter(year > (max(year, na.rm = TRUE) - 9) & year <= max(year, na.rm = TRUE)) |> 
+
+# IMPORTANT USER INPUT: Specify statsys_active (not offical statistics) or statsys_official (official statistics)
+vec_statsys_version <- "statsys_active"
+
+df_oda_ten <- noradstats::access_statsys(version = vec_statsys_version) |> 
+  filter(
+    type_of_flow == "ODA",
+    type_of_agreement != "Rammeavtale",
+    year > (max(year, na.rm = TRUE) - 9) & year <= max(year, na.rm = TRUE)
+    ) |> 
   
   # Velger variabler, grupperer og summerer
   group_by(recipient_country_crs,
