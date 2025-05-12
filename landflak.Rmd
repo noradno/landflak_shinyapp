@@ -303,9 +303,9 @@ table_total <- df_total_tbl |>
   font(fontname = "Cambria", part = "all") |>
   fontsize(size = 9, part = "all") |>
   fontsize(size = 11, part = "header", i = 1) |>
-  bold(part = "header", i = 1) |> 
+  bold(part = "header", i = 1)
   # italic(part = "header", i = 1) |>
-  bg(bg = c("#b4eac9", "#ffa274"), part = "body", i = c(1,2)) # Fargelegger rader
+  # bg(bg = c("#b4eac9", "#ffa274"), part = "body", i = c(1,2)) # Fargelegger rader
 
 # Fjerner overflødige datasett
 rm(df_total)
@@ -348,7 +348,7 @@ rm(vec_url_land)
 rm(vec_url_region)
 ```
 
-I `r vec_earmarked_maxyear` utbetalte Norge `r vec_earmarked_maxyear_sum` millioner kroner øremerket bistand til `r params$land` gjennom bilaterale og multilaterale kanaler[^1]. I tillegg viser beregninger at landet har mottatt bistand fra norsk kjernestøtte til multilaterale organisasjoner[^2].
+I `r vec_earmarked_maxyear` utbetalte Norge `r vec_earmarked_maxyear_sum` millioner kroner øremerket bistand til `r params$land` gjennom bilaterale og multilaterale kanaler[^1]. I tillegg viser beregninger at landet har mottatt bistand fra norsk kjernestøtte til multilaterale organisasjoner[^2], men `r vec_earmarked_maxyear`-beregninger er foreløpig ikke tilgjengelige.
 <!-- `r vec_earmarked_maxyear`-beregninger er ikke tilgjengelige per i dag. -->
 
 [^1]: [Landsiden til `r params$land`](`r vec_url`) i portalen bistandsresultater.no gir detaljert oversikt over øremerket bistand til landet.
@@ -629,7 +629,7 @@ table_df_partner <- df_partner |>
   hline(border = officer::fp_border(color="black"), part = "body", i = nrow(df_partner)-1) |>
   autofit(add_w = 0, add_h = 0) |> # Bruker autofit på høyde og bredde
   
-  fit_to_width(max_width = 7.5) |> # Spesifiserer maksimal bredde på tabell til 7.5 inch.
+  fit_to_width(max_width = 6.5) |> # Spesifiserer maksimal bredde på tabell til 7.5 inch.
   
   height_all(0.25, part = "all") |> # Justerer radhøyde
   hrule(rule = "exact", part = "all") |> #Justerer radhøyde
@@ -637,10 +637,10 @@ table_df_partner <- df_partner |>
   font(fontname = "Cambria", part = "all") |>
   fontsize(size = 9, part = "all") |>
   fontsize(size = 11, part = "header", i = 1) |>
-  bold(part = "header", i = 1) |> 
-  # italic(part = "header", i = 1) |>
-  bg(bg = "white", part = "body", i = seq(1, nrow(df_partner)-1)) |>
-  bg(bg = "#b4eac9", part = "body", i = seq(1, nrow(df_partner)-1, 2)) # Fargelegger annenhver rad minus totalraden
+  bold(part = "header", i = 1)
+  # italic(part = "header", i = 1)
+  # bg(bg = "white", part = "body", i = seq(1, nrow(df_partner)-1)) |>
+  # bg(bg = "#b4eac9", part = "body", i = seq(1, nrow(df_partner)-1, 2)) # Fargelegger annenhver rad minus totalraden
 
 # Til tekst: Største partnere ----
 df_partner_tekst <- df_partner |>
@@ -744,7 +744,7 @@ table_imp_org <- df_imp_org |>
   hline(border = officer::fp_border(color="black"), part = "body", i = nrow(df_imp_org)-1) |>
   autofit(add_w = 0, add_h = 0) |> # Bruker autofit på høyde og bredde
   
-  fit_to_width(max_width = 7.5) |> # Spesifiserer maksimal bredde på tabell til 7.5 inch.
+  fit_to_width(max_width = 6.5) |> # Spesifiserer maksimal bredde på tabell til 7.5 inch.
   
   height_all(0.25, part = "all") |> # Justerer radhøyde
   hrule(rule = "exact", part = "all") |> #Justerer radhøyde
@@ -752,10 +752,10 @@ table_imp_org <- df_imp_org |>
   font(fontname = "Cambria", part = "all") |>
   fontsize(size = 9, part = "all") |>
   fontsize(size = 11, part = "header", i = 1) |>
-  bold(part = "header", i = 1) |> 
+  bold(part = "header", i = 1)
   # italic(part = "header", i = 1) |>
-  bg(bg = "white", part = "body", i = seq(1, nrow(df_imp_org)-1)) |>
-  bg(bg = "#ffa274", part = "body", i = seq(1, nrow(df_imp_org)-1, 2)) # Fargelegger annenhver rad minus totalraden
+  # bg(bg = "white", part = "body", i = seq(1, nrow(df_imp_org)-1)) |>
+  # bg(bg = "#ffa274", part = "body", i = seq(1, nrow(df_imp_org)-1, 2)) # Fargelegger annenhver rad minus totalraden
 }
 
 # Til tekst: største partnere ----
