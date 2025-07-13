@@ -21,65 +21,48 @@ library(markdown)
 library(config)
 library(bslib)
 
-# Laster inn data i global environment ved å source scriptet import_data.R ---
+# Shiny app ----
+
+# Load data
+load(here::here("data_final", "countries.rda"))
 load(here::here("data_final", "landflak_datasets.rda"))
 
-# Country list for user input. Net recipients of Norwegian earmarked ODA last year 
 select_country <- df_countries |> 
   select(recipient_country_en_visual) |> 
   pull()
 
-# Shiny app ----
-
 # Spesifiserer frontend ----
-ui <-
-    fluidPage(
-        
-        # Tema
-        #theme = shinythemes::shinytheme("cerulean"),
-        
-        # Overskrift
-        titlePanel(title = "Country snapshots -- Statistical overviews of Norwegian development aid (ODA) to recipient countries"),
-        
-        # Landvalg i nedtrekksmeny
-        fluidRow(
-            column(6, # kolonnebredde (6 er halv skjermbredde)
-            selectInput("select_country",
-                        label = "Velg land",
-                        choices = select_country),
-            
-            # Nedlastingsknapp
-            downloadButton("report", "Generer landflak i Microsoft Word-format"),
-            
-            # Animasjon når serveren jobber
-            add_busy_spinner(spin = "semipolar", position = "full-page")
-            )),
-        
-        # Tekstomtale
-        fluidRow(
-            column(12, # kolonnebredde (6 er halv skjermbredde)
-                   p(), br(),
-                   includeMarkdown("ui_tekst.md"), # Tekstfil med info til brukere
-                   p(), br(),
-                   img(src = "norad_logo_black_small_rgb_micro.png")
-            )
-        )
+ui <- page_sidebar(
+    title = "Country snapshots – Statistical overviews of Norwegian development aid (ODA) to recipient countries",
+    sidebar = sidebar(
+        title = NULL,
+        open = "always",
+        width = "300px",
+        selectInput(
+            "select_country", 
+            label = "Select country",
+            choices = select_country
+        ),
+        downloadButton("report", "Produce"),
+        add_busy_bar()
+    ),
+    card(style = "max-width: 1000px",
+        card_header("Information"),
+        includeMarkdown("ui_tekst.md")
     )
+
+)
+
 
 # Innlogging med brukernavn og passord: wrapper ui i secure_app()
 ui <- secure_app(ui,
                  theme = "cerulean",
-                 set_labels(
-                   language = "en",
-                   "Login" = "Logg inn",
-                   "Please authenticate" = "Vennligst logg inn",
-                   "Username:" = "Brukernavn",
-                   "Password:" = "Passord"),
+                 set_labels(language = "en"),
                  tags_bottom = tags$div(
-                   tags$p("Ved spørsmål om innlogging, kontakt ",
+                   tags$p("For questions, please contact ",
                           tags$a(
                             href = "mailto:norad-statistikk.og.analyse@norad.no",
-                            target="_top", "Seksjon for Statistikk og analyse")),
+                            target="_top", "Norad's Section for Statistics and Analysis")),
                    tags$img(src = "norad_logo_black_small_rgb_micro.png")
                    )
                  )

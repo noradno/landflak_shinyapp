@@ -127,11 +127,16 @@ df_dac_raw <- df_dac_raw |>
 # Save objects in data_final folder
 save(
   df_oda_ten,
-  df_countries,
   df_dac_raw,
   df_imp_raw,
   df_imp_org_raw,
   file = here::here("data_final", "landflak_datasets.rda")
   )
+
+# Save separate object of countries
+save(
+  df_countries, 
+  file = here::here("data_final", "countries.rda")
+)
 
 
