@@ -19,21 +19,14 @@ library(shinythemes)
 library(dplyr)
 library(markdown)
 library(config)
+library(bslib)
 
 # Laster inn data i global environment ved å source scriptet import_data.R ---
 load(here::here("data_final", "landflak_datasets.rda"))
 
-# Country list for user input
-select_country <- df_oda_ten |>
-  filter(income_category != "Unspecified") |>
-  filter(year == max(year)) |>
-  group_by(recipient_country_no_visual) |>
-  summarise(total = sum(disbursed_mill_nok)) |>
-  ungroup() |>
-  filter(total > 0) |>
-  filter(!is.na(recipient_country_no_visual)) |>
-  select(recipient_country_no_visual) |>
-  arrange() |>
+# Country list for user input. Net recipients of Norwegian earmarked ODA last year 
+select_country <- df_countries |> 
+  select(recipient_country_en_visual) |> 
   pull()
 
 # Shiny app ----
@@ -46,7 +39,7 @@ ui <-
         #theme = shinythemes::shinytheme("cerulean"),
         
         # Overskrift
-        titlePanel(title = "Landflak - bistand til enkeltland"),
+        titlePanel(title = "Country snapshots -- Statistical overviews of Norwegian development aid (ODA) to recipient countries"),
         
         # Landvalg i nedtrekksmeny
         fluidRow(

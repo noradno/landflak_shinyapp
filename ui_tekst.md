@@ -1,25 +1,27 @@
-**Last ned landflak for å få en kortfattet oversikt over bistand til enkeltland**
+# **Country snapshots**
 
-Landflakene sammenstiller offisiell statistikk på øremerket bistand til enkeltland, fra Norge og andre medlemsland i OECDs utviklingskomite (DAC).
-<br>
-I tillegg presenteres offisielle beregninger fra OECD på hvor mye av Norges multilaterale kjernestøtte som brukes på mottakerlandet.
+**Country snapshots** are available for all countries that received bilateral aid from Norway in the most recent statistical year.
 
-Det er tilgang til å laste ned landflak for alle land som mottok bistand fra Norge ved forrige rapporteringsår. Landflakene er kun tilgjengelig på norsk.
-<br>
-Statistikken i landflakene dekker en tiårsperiode.
+**Content**
 
-Landflakene oppdateres fortløpende når de ulike statistikk-kildene oppdateres:
+The country snapshots provide statistical overviews of development aid (ODA) to recipient countries. Each snapshot includes:
 
-- Statistikk på øremerket bistand fra Norge til mottakerlandet tilsvarer til enhver tid den mest oppdaterte statistikken på [bistandsresultater.no](https://resultater.norad.no/no).
+-   The largest OECD DAC donor countries of development aid to the recipient country
 
-- Statistikk på bistand fra medlemsland i OECD DAC og beregnet norsk multilateral kjernestøtte til landet oppdateres når OECD publiserer nye tall.
+-   Norwegian development aid to the recipient country, including:
 
-**Internt verktøy**
+    -   Norwegian bilateral aid (through both bilateral and multilateral channels)
 
-Landflakene er et internt verktøy, og nettadressen skal ikke deles eksternt. Det er likevel mulig å dele et flak med eksterne.
-<br>
-Eksterne kan henvises til [bistandsresultater.no](https://resultater.norad.no/no), som inneholder den samlede norske bistandsstatistikken fra 1960 til i dag.
+    -   Estimated Norwegian multilateral core support to the recipient country
 
-**Spørsmål?**
+**Update frequency**
 
-Landflakene er utarbeidet av Norads seksjon for Statistikk og analyse. Ved spørsmål, ta kontakt med seksjonen: [Seksjon for Statistikk og analyse](mailto:norad-statistikk.og.analyse@norad.no)
+Country snapshots are updated in line with the release of new data from relevant sources of aid statistics sources. Statistics on Norwegian bilateral aid to countries are sourced from [aidresults.no](https://resultater.norad.no/en). Data on international aid to countries and estimates of Norwegian multilateral core support to countries are sourced from the [OECD Data Explorer](https://data-explorer.oecd.org/?fs%5B0%5D=Topic%2C0%7CDevelopment%23DEV%23&pg=0&fc=Topic&bp=true&snb=87) and correspondence with the OECD Development Co-operation Directorate (DCD).
+
+**Internal tool**
+
+The country snapshots compile publicly available statistics and contain no internal or undisclosed information. The tool is currently intended for internal use, but the snapshots may be shared with external users.
+
+**Questions?**
+
+Please contact Norad's [Seksjon for Statistics and Analysis](mailto:norad-statistikk.og.analyse@norad.no).
