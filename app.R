@@ -1,17 +1,9 @@
-# Shiny web app for å generere og laste ned parametriserte landflak i wordformat ----
-# Skrevet av Einar Tornes
-# Appen publseres via Rstudio desktop eller Rstudio Cloaud til shinyapps.io-serveren: https://noradstats.shinyapps.io/landflak/
+# Shiny web app to generate and download Quarto reports of Country snapshot of Norwegian in word format ----
+# The prod app is published to shinyapps.io: https://noradstats.shinyapps.io/landflak/. Remember to include all files when deploying.
+# Dev app is published to https://noradstats.shinyapps.io/landflak-dev/
+# Procedure: Before deploying the app, follow the steps in README.md to update data sources.
 
-# Appens server kjører scriptet landflak.Rmd når bruker har valgt landparameter på nettsiden (ui)
-
-# Pakken noradstats og noradplot må reinstalleres ved ny last til shinyapps.io: remotes::install_github("noradno/noradstats") og remotes::install_github("noradno/noradplot")
-# Husk at alle filer skal inkluderes (inkl. word-template) når appen publiseres til shinyapps.io
-
-
-# Før appen kjøres: last ned datakilder med separat script: get_data.R ---
-# Scriptet get_data laster ned datafiler til mappen data/
-
-# Laster inn pakker ----
+# Load packages ----
 library(shiny)
 library(shinybusy)
 library(shinymanager)
@@ -21,17 +13,18 @@ library(markdown)
 library(config)
 library(bslib)
 
-# Shiny app ----
-
-# Load data
+# Load data sources
 load(here::here("data_final", "countries.rda"))
 load(here::here("data_final", "landflak_datasets.rda"))
 
+# Load vector of unique countries
 select_country <- df_countries |> 
   select(recipient_country_en_visual) |> 
   pull()
 
-# Spesifiserer frontend ----
+# Shiny app ----
+
+# Front end ----
 ui <- page_sidebar(
     title = "Country snapshots – Statistical overviews of Norwegian development aid (ODA) to recipient countries",
     sidebar = sidebar(
@@ -47,14 +40,14 @@ ui <- page_sidebar(
         add_busy_bar()
     ),
     card(style = "max-width: 1000px",
-        card_header("Information"),
+        card_header("Produce Country Snapshots"),
         includeMarkdown("ui_tekst.md")
     )
 
 )
 
 
-# Innlogging med brukernavn og passord: wrapper ui i secure_app()
+# Secure login, by wrapping ui in shinymanager::secure_app()
 ui <- secure_app(ui,
                  theme = "cerulean",
                  set_labels(language = "en"),
@@ -67,10 +60,10 @@ ui <- secure_app(ui,
                    )
                  )
 
-# Spesifiserer backend ----
+# Backend ----
 server <- function(input, output) {
     
-    # Passordbeskyttelse: Sjekker credentials for å godkjenne innlogging
+    # Secure login, checking credentials
     res_auth <- secure_server(
       check_credentials = check_credentials(data.frame(
         user = config::get("credentials")$user,
@@ -80,16 +73,15 @@ server <- function(input, output) {
     
     output$report <- downloadHandler(
         
-        # Lager docx-output med filnavn på valgte land
+        # Produce and download parametrised Quarto snapshot report based on selected country (user input)
         filename = renderText({
             paste0(input$select_country, "_landflak.docx")
         }),
         content = function(file) {
-            # Set up parameters to pass to Rmd document
+            # Set up parameters to pass to Qmd document
             params <- list(land = input$select_country)
             
-            # Knit the document, passing in the `params` list, and eval it in a
-            # child of the global environment
+            # Knit the document, passing in the `params` list, and eval it in a child of the global environment
             rmarkdown::render(
                 "landflak.Rmd",
                 output_file = file,
@@ -100,5 +92,5 @@ server <- function(input, output) {
     )
 }
 
-# Bygg app
+# Build app
 shinyApp(ui, server)
