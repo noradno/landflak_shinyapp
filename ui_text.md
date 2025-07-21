@@ -1,4 +1,4 @@
-##### Produce Country Snapshots
+##### Select Country
 
 Select a country to generate and download a country snapshot in Microsoft Word format. Snapshots are available for all countries that received bilateral aid from Norway in the most recent statistical year.
 
