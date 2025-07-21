@@ -12,6 +12,8 @@ library(dplyr)
 library(markdown)
 library(config)
 library(bslib)
+library(quarto)
+library(withr)
 
 # Load data sources
 load(here::here("data_final", "countries.rda"))
@@ -41,7 +43,7 @@ ui <- page_sidebar(
     ),
     card(style = "max-width: 1000px",
         card_header("Produce Country Snapshots"),
-        includeMarkdown("ui_tekst.md")
+        includeMarkdown("ui-text.md")
     )
 
 )
@@ -62,34 +64,36 @@ ui <- secure_app(ui,
 
 # Backend ----
 server <- function(input, output) {
-    
-    # Secure login, checking credentials
-    res_auth <- secure_server(
-      check_credentials = check_credentials(data.frame(
-        user = config::get("credentials")$user,
-        password = config::get("credentials")$password,
-        stringsAsFactors = FALSE))
-    )
-    
-    output$report <- downloadHandler(
-        
-        # Produce and download parametrised Quarto snapshot report based on selected country (user input)
-        filename = renderText({
-            paste0(input$select_country, "_landflak.docx")
-        }),
-        content = function(file) {
-            # Set up parameters to pass to Qmd document
-            params <- list(land = input$select_country)
-            
-            # Knit the document, passing in the `params` list, and eval it in a child of the global environment
-            rmarkdown::render(
-                "landflak.Rmd",
-                output_file = file,
-                params = params,
-                envir = new.env(parent = globalenv())
-            )
-        }
-    )
+  
+  # Secure login, checking credentials
+  res_auth <- secure_server(
+    check_credentials = check_credentials(data.frame(
+      user = config::get("credentials")$user,
+      password = config::get("credentials")$password,
+      stringsAsFactors = FALSE))
+  )
+  
+  output$report <- downloadHandler(
+    filename = function() {
+      paste0(input$select_country, "-snapshot.docx")
+    },
+    content = function(file) {
+      temp_dir <- tempdir()
+      output_name <- "report.docx"
+      
+      # Render the Quarto document in temp_dir (using system2 to use Quarto from CLI)
+      withr::with_dir(temp_dir, {
+        system2("quarto", c(
+          "render", here::here("country_snapshot.qmd"),
+          "--output", output_name,
+          "--execute-param", paste0("selected_country=", input$select_country)
+        ))
+      })
+      
+      # Copy result to Shiny download location
+      file.copy(file.path(temp_dir, output_name), file, overwrite = TRUE)
+    }
+  )
 }
 
 # Build app
