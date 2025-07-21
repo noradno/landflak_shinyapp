@@ -1,0 +1,832 @@
+---
+title: "Norwegian aid to `r params$selected_country`"
+format:
+  docx:
+    reference-doc: template/country-snapshot-template.docx
+    number-sections: true
+params:
+  selected_country: "Ukraine"
+execute: 
+  echo: false
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: packages
+#| include: false
+
+# Loading packages
+library(stringr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(tibble)
+library(forcats)
+library(readxl)
+library(flextable)
+library(officer)
+library(janitor)
+library(grid)
+library(gridExtra)
+library(noradplot)
+library(nombre)
+ggnorad()
+```
+
+```{r}
+#| label: data-import
+#| eval: true
+
+# Set eval true to load data for testing, should be false in production
+load(here::here("data_final", "landflak_datasets.rda"))
+```
+
+
+```{r}
+#| label: international-aid
+
+# Internasjonal bistand fra DAC-land ----
+
+# Datasett filtrert på land og valgte variabler
+df_dac <- df_dac_raw |>
+  filter(recipient_country_en_visual == params$selected_country) |>
+  filter(year == max(year)) |>
+  select(oecd_donor_no, usd_mill, year) |>
+  arrange(desc(usd_mill))
+
+# Inkluderer tekstkolonne med rangering av giverland
+df_dac <- df_dac |>
+  # Kolonne med nummer-rangering
+  mutate(number_rank = 1:nrow(df_dac)) |>
+  
+  # Kolonne med tekst-rangering ved bruk av pakken ordinal, men ingen tekst for første plass.
+  mutate(number_string = if_else(number_rank == 1, "", as.character(ordinal(number_rank))))
+
+# Norges rangering blant giverland
+vec_dac_norway_rank <- df_dac |>
+  filter(oecd_donor_no == "Norway") |>
+  pull(number_string)
+
+# Totalsum fra giverland til aktuelle mottakerland
+vec_dac_totalsum <- df_dac |>
+  summarise(usd_mrd = sum(usd_mill)) |>
+  round(0) |>
+  pull()
+  
+# Antall DAC-giverland til aktuelle mottakerland
+vec_dac_donors_count <- length(unique(df_dac$oecd_donor_no))
+
+# Årstall for data
+vec_dac_maxyear <- max(df_dac_raw$year)
+
+# Datasett med kun 10 største giverland
+df_dac <- df_dac |>
+  # Avgrenser datasett til ti største giverland
+  top_n(10, usd_mill) |>
+  
+  # Endrer faktornivåer på donorland å sortere søyler fra størst til minst
+  mutate(oecd_donor_no = forcats::fct_reorder(oecd_donor_no, usd_mill)) |>
+  
+  # Lager labels-kolonne til søylene
+  mutate(barlabels = if_else(abs(usd_mill) < 3,
+                             as.character(round(usd_mill, digits = 1)),
+                             as.character(round(usd_mill, digits = 0))))
+
+# Plot: internasjonal bistand ----
+
+h_spacing <- max(df_dac$usd_mill) * 1.1
+
+plot_dac <- ggplot(data = df_dac, aes(x = oecd_donor_no, y = usd_mill)) + 
+  geom_col(fill = norad_pal("green")) +
+  coord_flip(clip = "off") +
+  scale_y_continuous(expand=c(0, NA), limits = c(0, h_spacing)) +
+  geom_text(aes(label = paste0(" ", format(barlabels, big.mark = " "), " ")), 
+            hjust = 0) +
+  labs(title = paste0("Largest donors to ", params$selected_country, " in ", vec_dac_maxyear),
+       subtitle = "Bilateral ODA from OECD/DAC-countries. Net disbursed. USD mill.",
+       x = NULL, y = NULL) +
+  annotate("text", x = 1, y = h_spacing, hjust = 1, vjust = 0, size = 4,
+           label = paste0("DAC-countries Total: USD ", format(vec_dac_totalsum, big.mark = " "), " mill.\n",
+                          "Number of DAC-country donors: ", vec_dac_donors_count)) +
+    theme(axis.ticks.y = element_blank(),
+          plot.title=element_text(size=16),
+          plot.subtitle=element_text(size=12, margin = ggplot2::margin(t = 0, b = 5)),
+          )
+
+# Fjerner overflødige objekter
+rm(df_dac)
+rm(df_dac_raw)
+```
+
+**This country snapshot provides a statistical overview of Norwegian development aid (ODA) to `r params$selected_country`.**
+
+# International aid to `r params$selected_country`
+
+In `r vec_dac_maxyear`, Norway was the `r vec_dac_norway_rank` largest donor of bilateral aid to `r params$selected_country` among members countries of the OECD Development Assistance Committee (DAC). The latest available international figures by recipient country are for `r vec_dac_maxyear`.
+
+<!-- Print plot -->
+
+```{r}
+#| label: print-plot-international
+#| fig-dpi: 150
+#| fig-width: 4
+#| fig-height: 2.4
+
+plot_dac
+```
+
+# Norwegian aid to `r params$selected_country`
+
+```{r}
+#| label: total-aid
+# Total norsk bistand ----
+
+# Datasett på total øremerket bistand. Spesifiserer kolonne "Type bistand"
+df_earmarked <- df_oda_ten |>
+  filter(recipient_country_en_visual == params$selected_country,
+         year >= max(year)-9) |> 
+  group_by(year) |>
+  summarise(mill_nok = sum(disbursed_mill_nok)) |>
+  add_column(type_bistand = "Bilateral aid", .before = 1 ) |>
+  ungroup()
+
+# Passer på at år uten data i tiårsperioden også inkluderes
+# For-loop: Legger til rad for hvert år uten bistand og sorterer etter år
+vec_all_years <- min(unique(df_oda_ten$year)):max(unique(df_oda_ten$year))
+
+for(i in seq_along(vec_all_years)) {
+  if (!vec_all_years[i] %in% df_earmarked$year) {
+    df_earmarked <- df_earmarked |>
+      add_row(type_bistand = "Bilateral aid",
+              year = vec_all_years[i],
+              mill_nok = 0) |>
+      arrange(year)
+  }
+}
+
+# Dataasett på total imputed multilateral. Spesifiserer kolonne "Type bistand"
+df_imp <- df_imp_raw |>
+  filter(recipient_country_en_visual == params$selected_country,
+         year %in% df_earmarked$year) |>
+  rename(mill_nok = disbursed_mill_nok) |>
+  select(year, mill_nok) |>
+  mutate(year = as.numeric(year)) |>
+  add_column(type_bistand = "Estimated multilateral core support", .before = 1)
+
+# Datasett med øremerket og imputert kjernestøtte
+df_total <- bind_rows(df_earmarked, df_imp) 
+
+# Total øremerket bistand til landet
+vec_earmarked_maxyear_sum <- df_earmarked |>
+  filter(year == max(year)) |>
+  mutate("mill_nok" = if_else(abs(mill_nok) < 3, as.character(round(mill_nok, digits = 1)), 
+                             as.character(round(mill_nok, digits = 0)))) |>
+  pull(mill_nok)
+
+# Total beregnet multilateral kjernestøtte til landet
+vec_imp_maxyear_sum <- df_imp |>
+    filter(year == max(year)) |>
+  mutate("mill_nok" = if_else(abs(mill_nok) < 3, as.character(round(mill_nok, digits = 1)), 
+                             as.character(round(mill_nok, digits = 0)))) |>
+  pull(mill_nok)
+
+# Nyeste år for øremerket bistand
+vec_earmarked_maxyear <- max(df_earmarked$year)
+
+# Nyeste år for beregnet multilateral bistand
+vec_imp_maxyear <- max(df_imp$year)
+```
+
+```{r}
+#| label: total-aid-plot
+
+# Datasett inkl kolonne med label-posisjon. Arrange/sort and compute cumulative summs: Halvparten av høyeden til kategoriene.
+df_total_plot <- df_total |>
+  group_by(year) |>
+  arrange(year, desc(type_bistand)) |>
+  mutate(lab_ypos = cumsum(mill_nok) - 0.5 * mill_nok) |> 
+  ungroup()
+
+# Total-label posisjon: Totalsum over hver søyle
+df_total_plot_label <- df_total |>
+  group_by(year) |>
+  summarize(total = sum(mill_nok)) |>
+  round() |> 
+  ungroup()
+
+# Sjekk om beregnet støtte er tilgjengelig for siste år
+v_lastyeartype <- df_total_plot |> 
+  filter(year == max(year)) |> 
+  pull(type_bistand) |> 
+  unique() |> 
+  length()
+
+# Fjerner totallabel på siste år hvis det ikke er beregnet kjernestøtte det året.
+if(v_lastyeartype == 1) {
+ df_total_plot_label <- df_total_plot_label |> 
+    filter(year != max(year))
+}
+
+# Plot: Stablet søylediagram med total-labels ----
+plot_total <- ggplot(data = df_total_plot, aes(x = year, y = mill_nok)) +
+  geom_col(aes(fill = type_bistand)) +
+  geom_text(aes(y = lab_ypos, label = round(mill_nok, digits = 0), group = type_bistand, colour = type_bistand), show.legend = F) +
+  geom_text(aes(year, total, label = format(total, big.mark = " "), fill = NULL, vjust = -1), data = df_total_plot_label) +
+  scale_fill_manual(values=c("#ffa274", "#03542d")) +
+  scale_colour_manual(values = c("black", "white")) + # Tekstfarge
+  labs(title = paste0("Aid to ", params$selected_country, ", by type of support. ", min(vec_all_years),"-", max(vec_all_years)),
+       x = NULL, y = "NOK million") +
+  theme(plot.title=element_text(size=16),
+        axis.text.x= element_text(size = 9, angle = 0, vjust = 1), # Få med årstall på søyler
+        legend.position="bottom",
+        legend.title = element_blank(),
+        legend.text=element_text(size=11),
+        legend.key.size = unit(0.3, "cm"),
+        axis.ticks.x = element_blank()
+        # plot.margin=unit(c(0.3, 0, 0.2, 0),"cm")
+        ) + # Legger til litt marg over og under plottet
+  scale_x_continuous(breaks = seq(min(vec_all_years), max(vec_all_years), by = 1)) + # Få med årstall på hver eneste søyle
+  scale_y_continuous(expand= expansion(c(0, 0.2))) +
+  coord_cartesian(clip = "off") +
+  guides(fill = guide_legend(reverse=TRUE),
+         colour = guide_legend(reverse=TRUE))
+```
+
+```{r}
+#| label: total-aid-table
+
+df_total_tbl <- df_total |>
+  # Strekker ut datasett med år-kolonner
+  arrange(year) |>
+  pivot_wider(names_from = "year", values_from = "mill_nok") |>
+  
+  # Legger inn totalrad. Beholder NA-verdier.
+  janitor::adorn_totals(where = "row", fill = "-", na.rm = FALSE) |>
+  
+  # Avrunder beløp. Lave verdier får desimaler. Character-vektor godtar ulike antall desimaler
+  mutate(across(where(is.numeric), \(.) (if_else(abs(.) < 3, as.character(format(round(., digits = 1), big.mark = " ")), 
+                                 as.character(format(round(., digits = 0), big.mark = " ")))))) |>
+  
+  # Erstatter punktum med komma i alle kolonner
+  mutate(across(everything(), \(.) str_replace(.,"[.]",","))) |>
+  
+  # Spesifisererer NA-verdier som tomrom
+  mutate(across(everything(), \(.) replace_na(., " "))) |>
+  
+  # Endrer variabelnavn
+  rename("Type of support" = type_bistand)
+
+# Tabell total bistand ----
+table_total <- df_total_tbl |>
+  flextable() |>
+  align(align = "left", j = colnames(df_total_tbl)[1], part = "all") |> # Venstrejusterer første kolonne
+  align(align = "right", j = c(2:ncol(df_total_tbl)), part = "all") |> # Høyrejusterer resten av kolonnene
+  border_remove() |>
+  hline_bottom(border = officer::fp_border(color="black"), part = "header") |>
+  hline(border = officer::fp_border(color="black"), part = "body", i = nrow(df_total_tbl)-1) |>
+  fit_to_width(max_width = 6.5) |> # Spesifiserer maksimal bredde på tabell til 7.5 inch.
+  # width(width = 1.9, j = 1) |> # Justerer bredden på kolonne 1
+  
+  autofit(add_w = 0, add_h = 0) |> # Bruker autofit på høyde og bredde
+  
+  add_header_lines(paste0("Aid to ", params$selected_country, " ", min(vec_all_years),"-", max(vec_all_years), ", by type of support. NOK mill.")) |>
+  font(fontname = "Cambria", part = "all") |>
+  fontsize(size = 9, part = "all") |>
+  fontsize(size = 11, part = "header", i = 1) |>
+  bold(part = "header", i = 1)
+  # italic(part = "header", i = 1) |>
+  # bg(bg = c("#b4eac9", "#ffa274"), part = "body", i = c(1,2)) # Fargelegger rader
+
+# Fjerner overflødige datasett
+rm(df_total)
+rm(df_imp)
+rm(df_imp_raw)
+rm(df_total_tbl)
+rm(df_total_plot)
+```
+
+```{r}
+#| label: link-url-aidresults
+# Link til landsiden i resultatportalen ----
+# Landsiden i resultatportalen bruker visuelle land- og regionavn.
+
+# url-landnavn
+vec_url_land <- params$selected_country |>
+  str_to_lower() |>
+  str_replace_all(" ", "-") |>
+  str_replace_all("[.]", "") |>
+  str_squish() |>
+  str_replace_all("æ", "ae") |>
+  str_replace_all("ø", "oe") |>
+  str_replace_all("å", "aa")
+
+# url-regionnavn
+vec_url_region <- df_oda_ten |>
+  filter(recipient_country_en_visual == params$selected_country) |>
+  select(main_region_no) |>
+  unique() |>
+  pull() |>
+  str_to_lower() |>
+  str_replace_all("æ", "ae") |>
+  str_replace_all("ø", "oe") |>
+  str_replace_all("å", "aa")
+
+#url
+vec_url <- paste0("https://resultater.norad.no/bistands-tall/geografi/", vec_url_region, "/", vec_url_land)
+
+#Fjerner overfødige objekter
+rm(vec_url_land)
+rm(vec_url_region)
+```
+
+In `r vec_earmarked_maxyear`, Norway disbursed NOK `r vec_earmarked_maxyear_sum` million to `r params$selected_country` through both bilateral and multilateral channels.[^1] In addition, Kenya received an estimated share of Norway's core support to multilateral organisations, but such figures for `r vec_earmarked_maxyear` are not yet available.
+
+[^1]: [Aidresults.no](`r vec_url`) provides detailed statistics on Norwegian bilateral aid to `r params$selected_country`.
+
+[^2]: Estimated multilateral core support from Norway to `r params$selected_country` has been calculated by the OECD Development Co-operation Directorate (DCD). These estimates, referred to as *imputed multilateral ODA to countries* are based on how multilateral organisations allocate their core resources across recipient countries. Note that aid provided through regional and global programmes beyond multilateral core contributions is not included.
+
+<!-- Printer totalplot/totaltabell -->
+
+```{r}
+#| label: print-total-aid
+#| fig-height: 2.2
+#| fig-width: 4
+#| fig-dpi: 150
+#| ft.align: "left"
+#| ft.split: false
+
+# Print enten figur eller tabell. Hvis det er stor forskjell mellom største beløp og og laveste beløp, så printes tabell.
+if (min(head(df_total_plot_label$total, n = -1)) / max(head(df_total_plot_label$total, n = -1)) > 0.2) {
+  plot_total
+} else {
+  table_total # Tabell
+}
+
+#Fjerner overflødige objekter
+rm(df_total_plot_label)
+```
+
+## Norwegian bilateral aid in `r vec_earmarked_maxyear`
+
+```{r}
+#| label: topics
+# Datasett på øremerket bistand fordelt på tema. Inkluderer prosentkolonne
+df_tema <- df_oda_ten |>
+  filter(recipient_country_en_visual == params$selected_country,
+         year == max(year)) |>                 
+  group_by(target_area) |>
+  summarise(mill_nok = sum(disbursed_mill_nok)) |>
+  mutate(prosent = mill_nok / sum(mill_nok)) |>
+  arrange(desc(`mill_nok`)) |>
+  ungroup()
+
+# Hvis mer enn 1 kategorier har prosentverdi under en gitt terskel, så erstattes de med en "Andre"-kategori (som plasseres til sist)
+# Lager en liste for å sortere temaene etter beløpsstørrelse (faktornivåer), hvor en eventuell "Andre"-kategori plasseres sist.
+arrange_list <- fct_reorder(c(df_tema$target_area, "Other"), c(df_tema$mill_nok, 0), .desc = TRUE)
+
+df_tema <- df_tema |>
+  mutate(target_area = if_else(
+    nrow(filter(df_tema, abs(prosent) < 0.03)) > 1 & abs(df_tema$prosent) < 0.03, "Other", df_tema$target_area)) |>
+  group_by(target_area) |>
+  summarise(mill_nok = sum(mill_nok),
+            prosent = sum(prosent)) |>
+  arrange(match(target_area, arrange_list))
+
+#Velger antall desimaler, og lager terskel på under 3 million og 3 prosent.
+#Bruker character på beløp for at ikke alle beløp får like mange desimal.
+df_tema <- df_tema |>
+  mutate(mill_nok_label = if_else(abs(mill_nok) < 3,
+                            as.character(format(round(mill_nok, digits = 1), big.mark = " ")),
+                            as.character(format(round(mill_nok, digits = 0), big.mark = " "))),
+         prosent_label = if_else(abs(prosent * 100) < 3,
+                           paste0(round(prosent * 100, digits = 1), " %"),
+                           paste0(round(prosent * 100, digits = 0), " %")))
+
+# Fjerner prosentkolonnen om den inneholder minst 1 negativ prosentverdi.
+# Trinn 1: Lager prosent-datasett med kun prosentkolonnen, og fjerner den om den har negative verdier.
+df_tema_p <- df_tema |> 
+  select(prosent, prosent_label) |>
+  select_if(\(.) !any(str_starts(., "-")))
+
+# Kobler sammen prosent-datasett med df_tema.
+df_tema <- df_tema |> 
+  select(target_area, mill_nok, mill_nok_label)
+
+df_tema <- bind_cols(df_tema, df_tema_p)
+
+# Barlabels-kolonne med beløp og pronset. Hvis prosentene er utelatt i script over pga negative verdier utelates prosentverdiene fra label
+df_tema <- df_tema |>
+  mutate(barlabels = paste0("  ", df_tema$mill_nok_label, " mill (", df_tema$prosent_label, ")  ")) |>
+  mutate(barlabels = if_else(str_detect(barlabels, "%", negate = TRUE), 
+                     str_sub(barlabels, end=-5), 
+                     barlabels)) |> # hvis det ikke er prosent-tegn, så fjernes prosentdelen av label
+  mutate(barlabels = str_replace_all(barlabels,"[.]",","))
+
+## Plot ----
+plot_tema <- ggplot(df_tema, aes(x = reorder(target_area, mill_nok), y = mill_nok)) +
+  geom_col(width = 0.8, fill = norad_pal("green")) +
+  coord_flip(clip = "off") +
+  scale_y_continuous(expand=c(0, NA), limits = c(0, max(df_tema$mill_nok / 100 * 180))) +
+  geom_text(aes(label = barlabels), hjust = 0) +
+  labs(title = "Thematic distribution",
+       subtitle = paste0("Bilateral aid to ", params$selected_country, " in ", vec_earmarked_maxyear, ". NOK million"), x = NULL, y = NULL) +
+  theme(plot.title=element_text(size=16),
+        plot.subtitle=element_text(size=12, margin = ggplot2::margin(t = 0, b = 5)),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line.y = element_blank())
+
+# Til tekst: største tema
+vec_tema_top <- case_when(
+  length(unique(df_tema$target_area)) > 2 ~ paste0(
+    df_tema$target_area[1], " (",df_tema$mill_nok_label[1]," mill), ",
+    df_tema$target_area[2], " (",df_tema$mill_nok_label[2]," mill) and ",
+    df_tema$target_area[3], " (",df_tema$mill_nok_label[3]," mill)"
+    ),
+  length(unique(df_tema$target_area)) == 2 ~ paste0(
+    df_tema$target_area[1], " (",df_tema$mill_nok_label[1]," mill) and ",
+    df_tema$target_area[2], " (",df_tema$mill_nok_label[2]," mill)"
+    ),
+  length(unique(df_tema$target_area)) == 1 ~ paste0(
+    df_tema$target_area[1], " (",df_tema$mill_nok_label[1]," mill)"
+    )
+  )
+
+# Til tekst: temaomtale
+vec_tema_omtale <- if_else(length(levels(as.factor(df_tema$target_area))) < 4, "", "most of")
+
+# Fjerner overflødige objekter
+rm(df_tema_p)
+```
+
+In `r vec_earmarked_maxyear`, `r vec_tema_omtale` most of Norway's bilateral aid to `r params$selected_country` was targeting `r vec_tema_top`.
+
+<!-- Printer temaplot -->
+
+```{r}
+#| label: print-plot-topic
+#| fig-height: 2.2
+#| fig-width: 4
+#| fig-dpi: 150
+
+plot_tema
+```
+
+```{r}
+#| label: partnertype
+
+# Datasett på øremerket bistand fordelt på partnertype. Inkluderer prosentkolonne
+df_partnertype <- df_oda_ten |>
+  filter(recipient_country_en_visual == params$selected_country,
+         year == max(year)) |>
+  group_by(partner_group_visual) |>
+  summarise(mill_nok = sum(disbursed_mill_nok)) |> 
+  mutate(prosent = mill_nok / sum(mill_nok)) |>
+  arrange(desc(`mill_nok`)) |>
+  ungroup()
+
+# Lager en restkategori "Andre" hvis mer enn 1 kategori har prosentverdi under terskel.
+# Lager en liste med faktorrekkevølge etter beløpsstørrelse, men med Andre-kateogien sist.
+arrange_list <- fct_reorder(c(df_partnertype$partner_group_visual, "Other"), c(df_partnertype$mill_nok, 0), .desc = TRUE)
+
+#Lager restkategorien "Andre" og sorterer etter arrange_list
+df_partnertype <- df_partnertype |>
+  mutate(partner_group_visual = if_else(
+    nrow(filter(df_partnertype, abs(prosent) < 0.03)) > 1 & abs(df_partnertype$prosent) < 0.03,
+    "Other", df_partnertype$partner_group_visual)) |>
+  group_by(partner_group_visual) |>
+  summarise(mill_nok = sum(mill_nok),
+            prosent = sum(prosent)) |>
+  arrange(match(partner_group_visual, arrange_list))
+
+#Velger antall desimaler, og lager terskel på under 3 million og 3 prosent.
+#Bruker character på beløp for at ikke alle beløp får like mange desimal.
+df_partnertype <- df_partnertype |>
+  mutate(mill_nok_label = if_else(abs(mill_nok) < 3,
+                                  as.character(format(round(mill_nok, digits = 1), big.mark = " ")),
+                                  as.character(format(round(mill_nok, digits = 0), big.mark = " "))),
+         prosent_label = if_else(abs(prosent * 100) < 3,
+                                 paste0(round(prosent * 100, digits = 1), " %"),
+                                 paste0(round(prosent * 100, digits = 0), " %")))
+
+# Fjerner prosentkolonnen om den inneholder minst 1 negativ prosentverdi.
+# Trinn 1: Lager prosent-datasett med kun prosentkolonnen, og fjerner den om den har negative verdier.
+df_partnertype_p <- df_partnertype |> 
+  select(prosent, prosent_label) |>
+  select_if(\(.) !any(str_starts(., "-")))
+
+# Trinn 2: Kobler sammen prosent-datasett med df_tema.
+df_partnertype <- df_partnertype |>
+  select(partner_group_visual, mill_nok, mill_nok_label)
+
+df_partnertype <- bind_cols(df_partnertype, df_partnertype_p)
+
+# Barlabels-kolonne med beløp og prosent.
+# Hvis det ikke er prosent (betingelse over) så utelates prosenten
+df_partnertype <- df_partnertype |>
+  mutate(barlabels = paste0("  ", df_partnertype$mill_nok_label, " mill (", df_partnertype$prosent_label, ")  ")) |> 
+  mutate(barlabels = if_else(str_detect(barlabels, "%", negate = TRUE), 
+                           str_sub(barlabels, end=-5),
+                           barlabels)) |> 
+  mutate(barlabels = str_replace_all(barlabels,"[.]",","))
+
+## Plot ----
+plot_partnertype <- ggplot(df_partnertype, aes(x = reorder(partner_group_visual, mill_nok), y = mill_nok)) +
+  geom_col(width = 0.8, fill = norad_pal("green")) +
+  coord_flip(clip = "off") +
+  scale_y_continuous(expand=c(0, NA), limits = c(0, max(df_partnertype$mill_nok / 100 * 180))) +
+  geom_text(aes(label = barlabels), hjust = 0) +
+  labs(title = "Type of partner",
+       subtitle = paste0("Bilateral aid to ", params$selected_country, " i ", vec_earmarked_maxyear, ". NOK million"), x = NULL, y = NULL) +
+  theme(plot.title=element_text(size=16),
+        plot.subtitle=element_text(size=12, margin = ggplot2::margin(t = 0, b = 5)),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line.y = element_blank())
+
+# Til tekst: Største partnertyper: Betinget på antall kategorier (mer enn 2, 2 eller 1)
+vec_partnertype_top <- case_when(
+  length(unique(df_partnertype$partner_group_visual)) > 2 ~ paste0(
+    df_partnertype$partner_group_visual[1], " (", df_partnertype$mill_nok_label[1], " mill), ",
+    df_partnertype$partner_group_visual[2], " (", df_partnertype$mill_nok_label[2], " mill) and ",
+    df_partnertype$partner_group_visual[3], " (", df_partnertype$mill_nok_label[3], " mill)"
+    ),
+  length(unique(df_partnertype$partner_group_visual)) == 2 ~ paste0(
+    df_partnertype$partner_group_visual[1], " (", df_partnertype$mill_nok_label[1], " mill) and ",
+    df_partnertype$partner_group_visual[2], " (",
+    df_partnertype$mill_nok_label[2], " mill)"
+  ),
+  length(unique(df_partnertype$partner_group_visual)) == 1 ~ paste0(
+    df_partnertype$partner_group_visual[1], " (",
+    df_partnertype$mill_nok_label[1], " mill)"
+  )
+)
+
+# Til tekst: partnergruppeomtale
+vec_partnergruppe_omtale <- if_else(length(unique(df_partnertype$partner_group_visual)) < 4, "", "most of")
+```
+
+In `r vec_earmarked_maxyear`, `r vec_partnergruppe_omtale` Norway's bilateral aid to `r params$selected_country` was channeled through `r vec_partnertype_top`.
+
+<!-- Printer partnertype plot -->
+
+```{r}
+#| label: print-plot-partnertype
+#| fig-height: 2.2
+#| fig-width: 4
+#| fig-dpi: 150
+
+plot_partnertype
+```
+
+```{r}
+#| label: partners
+# Datasett på øremerket bistand fordelt på enkeltpartner
+df_partner <- df_oda_ten|>
+  filter(recipient_country_en_visual == params$selected_country, # Definerer land med parameter
+         year == max(year)) |> 
+  group_by(agreement_partner) |>
+  summarise(mill_nok = sum(disbursed_mill_nok)) |>
+  arrange(desc(`mill_nok`)) |>
+  ungroup()
+
+# Topp 10 partnere
+df_partner_top <- df_partner |> top_n(10, mill_nok) 
+
+# Resterende partnere
+df_partner_rest <- df_partner |>
+  filter(!agreement_partner %in% df_partner_top$agreement_partner) |>
+  summarise(mill_nok = sum(mill_nok)) |>
+  add_column(agreement_partner = "Other") |>
+  select(agreement_partner, mill_nok)
+
+# Slår sammen topp 10 og andre partnere.
+df_partner <- bind_rows(df_partner_top, df_partner_rest)
+
+# Fjerner "Andre partnere"-kategorien hvis det ikke er utbetalt noe.
+df_partner <- df_partner |>
+  filter(mill_nok != 0)
+
+# Legger til totalrad
+df_partner <- df_partner |>
+  add_row(agreement_partner="Total", mill_nok = sum(df_partner$mill_nok))
+
+# Velger at lave beløp får desimaler. Bruker character for å tillate ulikt antall desimaler
+df_partner <- df_partner |> 
+  mutate(mill_nok = if_else(abs(mill_nok) < 3,
+                            as.character(round(mill_nok, digits = 1)),
+                            as.character(round(mill_nok, digits = 0))))
+
+# Erstatter punktum med komma på beløp.
+df_partner <- df_partner |> 
+  mutate(mill_nok = str_replace(df_partner$mill_nok,"[.]",","))
+
+# Nye kolonnenavn
+df_partner <- df_partner |>
+  rename("Avtalepartner" = agreement_partner,
+         "NOK mill" = mill_nok)
+
+# Tabell ----
+table_df_partner <- df_partner |>
+  flextable() |>
+  align(align = "left", j = colnames(df_partner)[1], part = "all") |> # Venstrejusterer første kolonne
+  align(align = "right", j = c(2:ncol(df_partner)), part = "all") |> # Høyrejusterer resten av kolonnene
+  border_remove() |>
+  hline_bottom(border = officer::fp_border(color="black"), part = "header") |>
+  hline(border = officer::fp_border(color="black"), part = "body", i = nrow(df_partner)-1) |>
+  autofit(add_w = 0, add_h = 0) |> # Bruker autofit på høyde og bredde
+  
+  fit_to_width(max_width = 6.5) |> # Spesifiserer maksimal bredde på tabell til 7.5 inch.
+  
+  height_all(0.25, part = "all") |> # Justerer radhøyde
+  hrule(rule = "exact", part = "all") |> #Justerer radhøyde
+  add_header_lines(paste0("Agreement partners, bilateral aid to ", params$selected_country, " in ", max(df_oda_ten$year))) |>
+  font(fontname = "Cambria", part = "all") |>
+  fontsize(size = 9, part = "all") |>
+  fontsize(size = 11, part = "header", i = 1) |>
+  bold(part = "header", i = 1)
+  # italic(part = "header", i = 1)
+  # bg(bg = "white", part = "body", i = seq(1, nrow(df_partner)-1)) |>
+  # bg(bg = "#b4eac9", part = "body", i = seq(1, nrow(df_partner)-1, 2)) # Fargelegger annenhver rad minus totalraden
+
+# Til tekst: Største partnere ----
+df_partner_tekst <- df_partner |>
+  filter(Avtalepartner != "Total")
+
+vec_partner_top <- case_when(
+  length(unique(df_partner_tekst$Avtalepartner)) > 2 ~ paste0(
+    df_partner_tekst$Avtalepartner[1], " (",df_partner_tekst$`NOK mill`[1]," mill), ",
+    df_partner_tekst$Avtalepartner[2], " (",df_partner_tekst$`NOK mill`[2]," mill) and ",
+    df_partner_tekst$Avtalepartner[3], " (",df_partner_tekst$`NOK mill`[3]," mill)"),
+  length(unique(df_partner_tekst$Avtalepartner)) == 2 ~ paste0(
+    df_partner_tekst$Avtalepartner[1], " (",df_partner_tekst$`NOK mill`[1]," mill) and ",
+    df_partner_tekst$Avtalepartner[2], " (",df_partner_tekst$`NOK mill`[2]," mill)"),
+  length(unique(df_partner_tekst$Avtalepartner)) == 1 ~ paste0(
+    df_partner_tekst$Avtalepartner[1], " (",df_partner_tekst$`NOK mill`[1]," mill)"))
+
+# Til tekst: partneromtale
+vec_partneromtale <- case_when(
+  length(unique(df_partner_tekst$Avtalepartner)) > 3 ~ "The three largest partners",
+  length(unique(df_partner_tekst$Avtalepartner)) == 3 ~ "The partners",
+  length(unique(df_partner_tekst$Avtalepartner)) == 2 ~ "The partners",
+  length(unique(df_partner_tekst$Avtalepartner)) == 1 ~ "The partner")
+```
+
+`r vec_partneromtale` for bilateral aid to `r params$selected_country` in `r vec_earmarked_maxyear` were `r vec_partner_top`.
+
+<!-- Printer partnertabell -->
+
+```{r}
+#| label: print-table-partner
+#| ft.align: "left"
+
+table_df_partner
+```
+
+## Estimated Norwegian multilateral core support to `r params$selected_country`
+
+```{r}
+#| label: imputed-multi-org
+
+# Årstall på data
+vec_imp_org_maxyear <- max(df_imp_org_raw$year)
+
+# Datasett på beregnet multilateral bistand per organisasjon
+df_imp_org <- df_imp_org_raw |>
+  filter(recipient_country_en_visual == params$selected_country) |>
+  select(multilateral_organisasjon, disbursed_mill_nok) |>
+  rename("Avtalepartner" = multilateral_organisasjon,
+         "mill_nok" = disbursed_mill_nok) |>
+  arrange(desc(`mill_nok`))
+
+# Topp 10 partnere
+df_imp_org_top <- df_imp_org |> top_n(10, mill_nok) 
+
+# Omplasserer kategorien "Andre FN-organisasjoner" nederst. Dette gjøres gjennom å sortere tabellen etter å matche en listesortering.
+# Lager da først en liste med riktig faktorsortering: sortert etter beløp og Andre FN-organisasjoner nederst.
+
+arrange_list_imputed <- df_imp_org_top |>       
+  filter(Avtalepartner != "Other UN agencies")
+
+arrange_list_imputed <- fct_reorder(c(arrange_list_imputed$Avtalepartner, "Other UN agencies"), 
+                                    c(arrange_list_imputed$mill_nok, 0), .desc = TRUE)
+
+df_imp_org_top <- df_imp_org_top |> # Sorterer tabellen etter lista over gjennom match-funksjonen.
+  arrange(match(Avtalepartner, arrange_list_imputed))
+
+# Lager en "Andre"-kategori som oppsummerer resten.
+df_imp_org_rest <- df_imp_org |>
+  filter(!Avtalepartner %in% df_imp_org_top$Avtalepartner) |>
+  summarise(mill_nok = sum(mill_nok)) |>
+  add_column("Avtalepartner" = "Other") |>
+  select(Avtalepartner, mill_nok) # Omsorterer kolonnene
+
+# Slår sammen topp til og andre partnere.
+df_imp_org <- bind_rows(df_imp_org_top, df_imp_org_rest) 
+
+df_imp_org <- df_imp_org |>
+  # Fjerner "Andre partnere"-kategorien hvis det ikke er utbetalt noe til denne kategorien.
+  filter(mill_nok != 0) |>
+  
+  # Legger til Totalrad
+  add_row("Avtalepartner"="Total", mill_nok = sum(df_imp_org$mill_nok)) |>
+  
+  # Velger antall desimaler, og lager terskel på under 1 million. Bruker character på beløp.
+  mutate(mill_nok = if_else(abs(mill_nok) < 3, as.character(round(mill_nok, digits = 1)), as.character(round(mill_nok, digits = 0)))) |>
+  
+  # Erstatter punktum med komma på beløp.
+  mutate(mill_nok = str_replace(mill_nok,"[.]",",")) |>
+  
+  # Nytt navn til mill_nok
+  rename("NOK mill" = mill_nok)
+
+# Tabell----
+
+# Create table if the table has rows (more than totalrow)
+valid_table_imp_org <- nrow(df_imp_org) > 1
+
+if(valid_table_imp_org) {
+
+table_imp_org <- df_imp_org |>
+  flextable() |>
+  align(align = "left", j = colnames(df_imp_org)[1], part = "all") |> # Venstrejusterer første kolonne
+  align(align = "right", j = c(2:ncol(df_imp_org)), part = "all") |> # Høyrejusterer resten av kolonnene
+  border_remove() |>
+  hline_bottom(border = officer::fp_border(color="black"), part = "header") |>
+  hline(border = officer::fp_border(color="black"), part = "body", i = nrow(df_imp_org)-1) |>
+  autofit(add_w = 0, add_h = 0) |> # Bruker autofit på høyde og bredde
+  
+  fit_to_width(max_width = 6.5) |> # Spesifiserer maksimal bredde på tabell til 7.5 inch.
+  
+  height_all(0.25, part = "all") |> # Justerer radhøyde
+  hrule(rule = "exact", part = "all") |> #Justerer radhøyde
+  add_header_lines(paste0("Agreement partners, estimated multilateral core support to ", params$selected_country, " in ", vec_imp_org_maxyear)) |>
+  font(fontname = "Cambria", part = "all") |>
+  fontsize(size = 9, part = "all") |>
+  fontsize(size = 11, part = "header", i = 1) |>
+  bold(part = "header", i = 1)
+  # italic(part = "header", i = 1) |>
+  # bg(bg = "white", part = "body", i = seq(1, nrow(df_imp_org)-1)) |>
+  # bg(bg = "#ffa274", part = "body", i = seq(1, nrow(df_imp_org)-1, 2)) # Fargelegger annenhver rad minus totalraden
+}
+
+# Til tekst: største partnere ----
+# Datasett som utelater total-raden
+df_imp_org_text <- df_imp_org |>
+  filter(Avtalepartner != "Total")
+
+# Største partnere
+vec_imp_org_top <- case_when(
+  length(unique(df_imp_org_text$Avtalepartner)) > 2 ~ paste0(
+    df_imp_org_text$Avtalepartner[1], " (",df_imp_org_text$`NOK mill`[1]," mill), ",
+    df_imp_org_text$Avtalepartner[2], " (",df_imp_org_text$`NOK mill`[2]," mill) and ",
+    df_imp_org_text$Avtalepartner[3], " (",df_imp_org_text$`NOK mill`[3]," mill)"),
+  
+  length(unique(df_imp_org_text$Avtalepartner)) == 2 ~ paste0(
+    df_imp_org_text$Avtalepartner[1], " (",df_imp_org_text$`NOK mill`[1]," mill) and ",
+    df_imp_org_text$Avtalepartner[2], " (",df_imp_org_text$`NOK mill`[2]," mill)"),
+  
+  length(unique(df_imp_org_text$Avtalepartner)) == 1 ~ paste0(
+    df_imp_org_text$Avtalepartner[1], " (",df_imp_org_text$`NOK mill`[1]," mill)"))
+
+# Utrykk i tekst
+vec_imp_org_omtale <- case_when(
+  length(unique(df_imp_org_text$Avtalepartner)) > 3 ~ "The three largest partners",
+  length(unique(df_imp_org_text$Avtalepartner)) == 3 ~ "The partners",
+  length(unique(df_imp_org_text$Avtalepartner)) == 2 ~ "The partners",
+  length(unique(df_imp_org_text$Avtalepartner)) == 1 ~ "The partner")
+```
+
+According to OECD estimates (*imputed multilateral ODA to countries*), `r params$selected_country` received NOK `r vec_imp_maxyear_sum` million of Norwegian core support to multilateral organisations in `r vec_imp_maxyear`.[^3]
+
+[^3]: Due to OECD rounding of values, there may be small discrepancies between the total estimated amount of multilateral core support to `r params$selected_country` in this table and the the figure shown in the table on the first page.
+
+The table below shows the distribution of this estimated core support by multilateral organisation in `r vec_imp_org_maxyear`[^4]. `r vec_imp_org_omtale` were `r vec_imp_org_top`.
+
+[^4]: The table does not include imputed multilateral core support to `r params$selected_country` for all multilateral organisations receiving core support from Norway. However, the estimates include organisations that account for approximately 90 percent of total core contributions from DAC countries to multilateral organisations.
+<!-- Printer partnertabell -->
+
+```{r}
+#| label: print-table-imputed-org
+#| ft.align: "left"
+
+if(valid_table_imp_org) {
+table_imp_org
+}
+```
+
+```{r timestamp}
+vec_today <- format(Sys.Date(), format="%d. %m. %Y")
+```
+
+<!-- Hopper over noen linjer -->
+<br>
+<br>
+<br>
+
+This country snapshot was generated on `r vec_today` from the [Country Snapshot portal ](https://noradstats.shinyapps.io/landflak/). For questions, please contact Norad's [Seksjon for Statistics and Analysis](mailto:norad-statistikk.og.analyse@norad.no).
