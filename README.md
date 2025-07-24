@@ -26,7 +26,7 @@ source("scripts/data_pipeline/run_pipeline.R")
 run_pipeline(last_year_donors = 2023, last_year_imputed = 2023)
 ```
 
-### Main Steps (Executed by `run_pipeline()`)
+### Main Steps: executed by `run_pipeline()`
 
 -   `get_data_donors(last_year)`: Fetches bilateral donor data for the specified year from the **OECD SDMX API**.
 -   `get_data_imputed(last_year)`: Fetches Norwegian imputed multilateral data for the last 10 years ending in the specified year from the **OECD SDMX API**.
