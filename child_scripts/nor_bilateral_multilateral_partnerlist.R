@@ -59,7 +59,7 @@ run_partnerlist <- function(
     
     data_flex <- data_partnerlist |>
       mutate(`NOK mill` = fmt_millnok(mill_nok)) |>
-      select("Avtalepartner" = {{ partner_col }}, `NOK mill`)
+      select("Agreement partner" = {{ partner_col }}, `NOK mill`)
     
     flextable(data_flex) |>
       align(align = "left", j = 1, part = "all") |>
@@ -72,12 +72,12 @@ run_partnerlist <- function(
       height_all(0.25, part = "all") |>
       hrule(rule = "exact", part = "all") |>
       add_header_lines(
-        paste("Agreement partners,", subtitle_label, "to", selected_country, "in", maxyear)
+        paste("Agreement Partners,", subtitle_label, "to", selected_country, "in", maxyear)
       ) |>
       font(fontname = "Cambria", part = "all") |>
       fontsize(size = 9, part = "all") |>
       fontsize(size = 11, part = "header") |>
-      bold(part = "header")
+      bold(part = "header", i = 1)
   }
   
   # -- Extract top 3 labels and prefix --
