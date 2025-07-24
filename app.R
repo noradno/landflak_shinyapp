@@ -90,7 +90,7 @@ server <- function(input, output) {
           system2("quarto", c(
             "render", here::here("country_snapshot.qmd"),
             "--output", output_name,
-            "--execute-param", paste0("selected_country=", input$select_country)
+            "--execute-param", paste0("selected_country=", shQuote(input$select_country))
           ))
         })
         
