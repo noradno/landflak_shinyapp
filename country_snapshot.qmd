@@ -220,4 +220,4 @@ vec_today <- format(Sys.Date(), format="%d. %m. %Y")
 <br>
 <br>
 
-This country snapshot was generated on `r vec_today` from the [Country Snapshot portal ](https://noradstats.shinyapps.io/landflak/). For questions, please contact Norad's [Seksjon for Statistics and Analysis](mailto:norad-statistikk.og.analyse@norad.no).
+This country snapshot was generated on `r vec_today` from the [Country Snapshot portal ](http://noradstats.shinyapps.io/country-snapshot/). For questions, please contact Norad's [Seksjon for Statistics and Analysis](mailto:norad-statistikk.og.analyse@norad.no).
