@@ -10,7 +10,7 @@ execute:
   message: false
   warning: false
 params:
-  selected_country: "Afghanistan"
+  selected_country: "Ethiopia"
 ---
 
 ```{r}
@@ -57,7 +57,7 @@ In `r int_total_aid$val_maxyear`, Norway was the `r int_total_aid$val_norway_ran
 ```{r}
 #| label: plot-international-aid
 #| fig-dpi: 150
-#| fig-width: 4
+#| fig-width: 5
 #| fig-height: 2.4
 
 print(int_total_aid$p_barplot)
@@ -87,7 +87,7 @@ result_portal_url <- run_result_portal_url(
 )
 ```
 
-In `r nor_total_aid$val_bilateral_maxyear`, Norway disbursed NOK `r nor_total_aid$val_bilateral_maxyear_sum` million in bilatearl aid to `r params$selected_country` through both bilateral and multilateral channels.[^1] In addition, Kenya received an estimated share of Norway's core support to multilateral organisations, but such figures for `r nor_total_aid$val_multilateral_maxyear` are not yet available.
+In `r nor_total_aid$val_bilateral_maxyear`, Norway disbursed NOK `r nor_total_aid$val_bilateral_maxyear_sum` million in bilatearl aid to `r params$selected_country` through both bilateral and multilateral channels.[^1] In addition, Kenya received an estimated share of Norway's core support to multilateral organisations, but such figures for `r nor_total_aid$val_multilateral_maxyear` are not yet available.[^2]
 
 [^1]: [Aidresults.no](`r result_portal_url`) provides detailed statistics on Norwegian bilateral aid to `r params$selected_country`.
 
@@ -96,7 +96,7 @@ In `r nor_total_aid$val_bilateral_maxyear`, Norway disbursed NOK `r nor_total_ai
 ```{r}
 #| label: total-aid-plot
 #| fig-dpi: 150
-#| fig-width: 4
+#| fig-width: 5
 #| fig-height: 2.6
 
 print(nor_total_aid$p_total_aid)
@@ -124,7 +124,7 @@ In `r bilateral_topics$val_maxyear`, `r bilateral_topics$val_prefix` most of Nor
 ```{r}
 #| label: print-plot-topic
 #| fig-height: 2.2
-#| fig-width: 4
+#| fig-width: 5
 #| fig-dpi: 150
 
 print(bilateral_topics$p_barplot)
@@ -150,7 +150,7 @@ In `r bilateral_partnertype$val_maxyear`, `r bilateral_partnertype$val_prefix` N
 ```{r}
 #| label: print-plot-partnertype
 #| fig-height: 2.2
-#| fig-width: 4
+#| fig-width: 5
 #| fig-dpi: 150
 
 print(bilateral_partnertype$p_barplot)
