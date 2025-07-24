@@ -26,7 +26,7 @@ run_pipeline <- function(last_year_donors = 2023, last_year_imputed = 2023) {
   df_imputed_raw <- get_data_imputed(last_year_imputed)
   
   message("⬇️ Fetching bilateral data from statsys (latest 10 years available)")
-  df_oda_ten <- get_data_bilateral()
+  df_oda_ten <- get_data_bilateral(version = "statsys_active")
   
   message("⬇️ Loading manually imputed multilateral aid by organization (latest available year)")
   df_imp_org_raw <- get_data_imputed_org()

@@ -38,14 +38,18 @@ create_final_data <- function(df_dac_raw, df_imputed_raw, df_oda_ten, df_imp_org
   library(janitor)
   library(here)
   
+  # Read mapping of countries and regions, to add visual country name to all data sources.
   df_landreg_raw <- read_csv2(here("data", "raw", "land_og_regioner.csv")) |> 
     janitor::clean_names() |> 
     select(navn_no, land_engelsk) |> 
     rename(recipient_country_en_visual = land_engelsk)
   
+  # Finalize Norwegian bilateral data (add visual country names)
   df_oda_ten <- df_oda_ten |> 
     left_join(df_landreg_raw, by = c("recipient_country_no" = "navn_no"))
   
+  # Data frame of valid recipient countries in app: visual country names of unique net positive recipients of Norwegian bilateral aid
+  # Data frame is used to enrich other datasets with visual country names and to populate the country dropdown in the app.
   df_countries <- df_oda_ten |> 
     filter(
       income_category != "Unspecified",
@@ -58,6 +62,7 @@ create_final_data <- function(df_dac_raw, df_imputed_raw, df_oda_ten, df_imp_org
     select(recipient_country_en_visual, recipient_country_crs) |> 
     arrange()
   
+  # Finalize Norwegian imputed multilateral aid data (add visual country names, filter and rename)
   df_imp_raw <- df_imputed_raw |> 
     filter(nok_mill != 0) |> 
     select(donor_label_en, crs_recipients_code, obs_time, nok_mill) |> 
@@ -65,11 +70,13 @@ create_final_data <- function(df_dac_raw, df_imputed_raw, df_oda_ten, df_imp_org
     left_join(df_countries, by = c("crs_recipients_code" = "recipient_country_crs")) |> 
     filter(!is.na(recipient_country_en_visual))
   
+  # Finalize Norwegian imputed multilateral aid by organisation data (add visual country names and select columns)
   df_imp_org_raw <- df_imp_org_raw |> 
     left_join(df_landreg_raw, by = c("recipient_country_no" = "navn_no")) |> 
     filter(recipient_country_en_visual %in% df_countries$recipient_country_en_visual) |> 
     select(multilateral_organisasjon, recipient_country_en_visual, year, disbursed_mill_nok)
   
+  # Finalize international donor aid data (add visual country names, rename, filter)
   df_dac_clean <- df_dac_raw |> 
     filter(usd_mill != 0) |> 
     select(donor_label_en, crs_donors_code, crs_recipients_code, obs_time, usd_mill) |> 
@@ -77,6 +84,7 @@ create_final_data <- function(df_dac_raw, df_imputed_raw, df_oda_ten, df_imp_org
     left_join(df_countries, by = c("crs_recipients_code" = "recipient_country_crs")) |> 
     filter(!is.na(recipient_country_en_visual))
   
+  # Write final output files
   write_rds(df_oda_ten, here("data", "final", "df_oda_ten.rds"))
   write_rds(df_dac_clean, here("data", "final", "df_dac_raw.rds"))
   write_rds(df_imp_raw, here("data", "final", "df_imp_raw.rds"))

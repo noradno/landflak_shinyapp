@@ -16,6 +16,7 @@ get_data_donors <- function(last_year) {
   library(here)
   library(janitor)
   
+  # Fetch SDMX data for selected DAC donors and purpose code 206 (All sectors)
   sdmx_dac <- readSDMX(
     providerId = "OECD",
     resource = "data",
@@ -26,18 +27,22 @@ get_data_donors <- function(last_year) {
     dsd = TRUE
   )
   
+  # Convert to tibble and clean column names
   df_dac <- as.data.frame(sdmx_dac, labels = TRUE) |> 
     as_tibble() |> 
     janitor::clean_names()
   
+  # Keep only country-level observations (exclude regional and total aggregates)
   df_dac <- df_dac |> 
     filter(!str_detect(recipient_label_en, "Total|regional")) |> 
     select(measure_label_en, donor, donor_label_en, recipient, recipient_label_en,
            obs_time, usd_mill = obs_value, unit_mult_label_en_label, price_base_label_en)
   
+  # Load local CRS code mappings for donors and recipients
   df_donors_code <- read_csv2(here("data", "raw", "crs_donors_code.csv"))
   df_recipients_code <- read_csv2(here("data", "raw", "crs_recipients_code.csv"))
   
+  # Join with CRS codes and filter out recipients without CRS codes
   df_dac <- df_dac |> 
     left_join(df_donors_code, join_by(donor == iso_code)) |> 
     left_join(df_recipients_code, join_by(recipient == iso_code)) |> 

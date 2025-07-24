@@ -1,7 +1,7 @@
 #' Download and prepare imputed Norwegian multilateral ODA data to recipient countries for the last 10 years
 #'
 #' This function downloads Official Development Assistance (ODA) data reported by Norway
-#' to the OECD DAC using the SDMX API. It retrieves imputed multilateral aid (purpose code 106)
+#' to the OECD DAC using the SDMX API. It retrieves imputed multilateral aid
 #' for the last 10 years ending in `last_year`, converts the values from USD to NOK using exchange rates,
 #' and appends donor/recipient CRS codes.
 #'
@@ -9,7 +9,7 @@
 #'
 #' @return A tibble containing cleaned imputed disbursements (in NOK millions) by recipient country
 #' 
-#' #' @examples
+#' @examples
 #' df_imputed <- get_data_imputed(last_year = 2023)
 #' 
 #' @export
@@ -19,8 +19,10 @@ get_data_imputed <- function(last_year) {
   library(here)
   library(janitor)
   
+  # Define start of 10-year window
   start_year <- last_year - 9
   
+  # Fetch SDMX data for imputed multilateral aid
   sdmx_imputed <- readSDMX(
     providerId = "OECD",
     resource = "data",
@@ -32,14 +34,17 @@ get_data_imputed <- function(last_year) {
     dsd = TRUE
   )
   
+  # Convert to tibble and clean column names
   df_imputed <- as.data.frame(sdmx_imputed, labels = TRUE) |> 
     as_tibble() |> 
     janitor::clean_names()
   
+  # Filter out aggregates and keep relevant columns
   df_imputed <- df_imputed |> 
     filter(!str_detect(recipient_label_en, "Total|regional")) |> 
     select(measure_label_en, donor, donor_label_en, recipient, recipient_label_en, obs_time, usd_mill = obs_value, unit_mult_label_en_label, price_base_label_en)
   
+  # Load local CRS code and exchange rate tables
   df_donors_code <- read_csv2(here("data", "raw", "crs_donors_code.csv"))
   df_recipients_code <- read_csv2(here("data", "raw", "crs_recipients_code.csv"))
   df_exchangerate <- read_csv2(here("data", "raw", "exchangerate.csv")) |> 
@@ -47,6 +52,7 @@ get_data_imputed <- function(last_year) {
     rename(exchangerate = obs_value) |> 
     mutate(obs_time = as.character(obs_time))
   
+  # Join with code lists and exchange rates, calculate NOK values
   df_imputed <- df_imputed |> 
     left_join(df_donors_code, join_by(donor == iso_code)) |> 
     left_join(df_recipients_code, join_by(recipient == iso_code)) |> 
