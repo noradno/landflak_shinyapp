@@ -6,6 +6,9 @@ config.yml
 landflak.docx
 landflak_en.docx
 
+# Rsconnect
+*.dcf
+
 # History files
 .Rhistory
 .Rapp.history
