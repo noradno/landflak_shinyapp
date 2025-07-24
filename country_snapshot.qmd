@@ -87,7 +87,7 @@ result_portal_url <- run_result_portal_url(
 )
 ```
 
-In `r nor_total_aid$val_bilateral_maxyear`, Norway disbursed NOK `r nor_total_aid$val_bilateral_maxyear_sum` million in bilatearl aid to `r params$selected_country` through both bilateral and multilateral channels.[^1] In addition, Kenya received an estimated share of Norway's core support to multilateral organisations, but such figures for `r nor_total_aid$val_multilateral_maxyear_sum` are not yet available.
+In `r nor_total_aid$val_bilateral_maxyear`, Norway disbursed NOK `r nor_total_aid$val_bilateral_maxyear_sum` million in bilatearl aid to `r params$selected_country` through both bilateral and multilateral channels.[^1] In addition, Kenya received an estimated share of Norway's core support to multilateral organisations, but such figures for `r nor_total_aid$val_multilateral_maxyear` are not yet available.
 
 [^1]: [Aidresults.no](`r result_portal_url`) provides detailed statistics on Norwegian bilateral aid to `r params$selected_country`.
 
@@ -199,7 +199,7 @@ According to OECD estimates (*imputed multilateral ODA to countries*), `r params
 
 [^3]: Due to OECD rounding of values, there may be small discrepancies between the total estimated amount of multilateral core support to `r params$selected_country` in this table and the the figure shown in the table on the first page.
 
-The table below shows the distribution of this estimated core support by multilateral organisation in `r multilateral_partners$val_maxyear`[^4]. `r multilateral_partners$val_prefix` were `r multilateral_partners$val_top_labels`.
+The table below shows the distribution of this estimated core support by multilateral organisation in `r multilateral_partners$val_maxyear`.[^4] `r multilateral_partners$val_prefix` were `r multilateral_partners$val_top_labels`.
 
 [^4]: The table does not include imputed multilateral core support to `r params$selected_country` for all multilateral organisations receiving core support from Norway. However, the estimates include organisations that account for approximately 90 percent of total core contributions from DAC countries to multilateral organisations.
 <!-- Printer partnertabell -->
