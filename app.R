@@ -31,7 +31,7 @@ select_country <- df_countries |>
 
 # Shiny UI ----
 ui <- page_sidebar(
-  title = "Country snapshots – Statistical overviews of Norwegian development aid (ODA) to recipient countries",
+  title = "Country Snapshot Reports",
   sidebar = sidebar(
     title = NULL,
     open = "always",
@@ -45,7 +45,7 @@ ui <- page_sidebar(
     add_busy_bar()
   ),
   card(style = "max-width: 1000px",
-       card_header("Produce Country Snapshots"),
+       card_header("Produce Country Snapshot Reports"),
        includeMarkdown("ui_text.md")
   )
 )
