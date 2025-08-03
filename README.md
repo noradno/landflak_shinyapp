@@ -10,7 +10,7 @@ A dedicated data pipeline retrieves, processes, and transforms data from multipl
 
 > ⚠️ **Before running the pipeline:** The `data/raw/` folder contains CSV files that must be manually updated. This includes:
 >
-> -   **`imputed_multi_land_org.csv`** (**main data source**): A manually maintained dataset of Norwegian imputed multilateral aid, by organization and country.
+> -   `imputed_multi_land_org.csv` (a main data source): A manually maintained dataset of Norwegian imputed multilateral aid, by organization and country.
 > -   `crs_donors_code.csv`, `crs_recipients_code.csv`, `exchangerate.csv`, and `land_og_regioner.csv` (helper files)
 >
 > For a complete guide to updating these files, see the section [📅 Manually Updating Input CSV Files](#📅-manually-updating-input-csv-files).
