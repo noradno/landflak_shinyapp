@@ -1,10 +1,10 @@
 ##### Select Country
 
-Select a country to generate and download a country snapshot in Microsoft Word format. Snapshots are available for all countries that received bilateral aid from Norway in the most recent statistical year.
+Select a country to generate and download a country snapshot report in Microsoft Word format (.docx). Snapshots are available for all countries that received bilateral aid from Norway in the most recent statistical year.
 
 ##### Content
 
-The country snapshots provide statistical overviews of development aid (ODA) to recipient countries. Each snapshot includes:
+The country snapshot reports provide statistical overviews of development aid (ODA) to recipient countries. Each snapshot includes:
 
 -   The largest OECD DAC donor countries of development aid to the recipient country
 
