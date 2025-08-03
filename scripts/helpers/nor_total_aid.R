@@ -1,9 +1,33 @@
-library(dplyr)
-library(ggplot2)
-library(forcats)
-library(scales)
-library(tidyr)
-library(noradstats)
+#' Summarize and visualize total Norwegian aid to a selected country by aid type
+#'
+#' This function prepares and visualizes Norwegian Official Development Assistance (ODA)
+#' to a selected recipient country, combining both bilateral aid (direct disbursements)
+#' and imputed multilateral core support. The result is a stacked bar plot showing
+#' annual totals by aid type, with total labels and values formatted in NOK millions.
+#'
+#' @param data_nor_bilateral_raw A data frame of bilateral disbursements from Statsys, produced by run_pipeline().
+#'        Must include `recipient_country_en_visual`, `disbursed_mill_nok`, and `year`.
+#' @param data_nor_multilateral_raw A data frame of imputed multilateral aid to countries, produced by run_pipeline().
+#'        Must include `recipient_country_en_visual`, `disbursed_mill_nok`, and `year`.
+#' @param selected_country A character string with the name of the recipient country to visualize.
+#'
+#' @return A named list with:
+#' \describe{
+#'   \item{val_bilateral_maxyear}{Most recent year of bilateral aid}
+#'   \item{val_bilateral_maxyear_sum}{Formatted NOK amount for bilateral aid in most recent year}
+#'   \item{val_multilateral_maxyear}{Most recent year of multilateral aid}
+#'   \item{val_multilateral_maxyear_sum}{Formatted NOK amount for multilateral aid in most recent year}
+#'   \item{p_total_aid}{A stacked `ggplot2` bar chart of total aid by year and aid type}
+#' }
+#'
+#' @examples
+#' run_nor_total_aid(
+#'   data_nor_bilateral_raw = df_oda_ten,
+#'   data_nor_multilateral_raw = df_imp_raw,
+#'   selected_country = "Mozambique"
+#' )
+#'
+#' @export
 
 run_nor_total_aid <- function(
     data_nor_bilateral_raw = df_oda_ten,

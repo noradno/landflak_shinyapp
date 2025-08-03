@@ -1,9 +1,27 @@
-library(dplyr)
-library(ggplot2)
-library(glue)
-library(forcats)
-library(scales)
-library(noradstats)
+#' Summarize and visualize total international bilateral aid to a selected country
+#'
+#' This function processes OECD/DAC bilateral aid data to summarize and visualize
+#' which donor countries gave the most aid (in USD millions) to a selected recipient country
+#' in the most recent available year. It returns a ranked list of donors, the total amount received,
+#' Norway's rank (if present), and a bar plot of the top 10 donors.
+#'
+#' @param data_int_raw A data frame of DAC bilateral ODA, produced by run_pipeline()
+#'        Must include at least columns: `recipient_country_en_visual`, `oecd_donor_no`, `usd_mill`, and `year`.
+#' @param selected_country A character string specifying the recipient country to analyze.
+#'
+#' @return A named list with:
+#' \describe{
+#'   \item{val_maxyear}{The most recent year of aid data}
+#'   \item{val_total_usd}{Total aid (USD mill.) from all DAC donors to the selected country}
+#'   \item{val_norway_rank}{String with Norway's donor rank (e.g., `"2nd"`) or `""` if not in data}
+#'   \item{data_donors}{A tibble with all donors ranked by disbursements}
+#'   \item{p_barplot}{A `ggplot2` bar plot of the top 10 donor countries}
+#' }
+#'
+#' @examples
+#' run_int_total_aid(data_int_raw = df_dac_raw, selected_country = "Malawi")
+#'
+#' @export
 
 run_int_total_aid <- function(
     data_int_raw = df_dac_raw,

@@ -1,10 +1,29 @@
-library(dplyr)
-library(ggplot2)
-library(forcats)
-library(scales)
-library(glue)
-library(rlang)
-library(noradstats)
+#' Generate summary data and bar plot of Norwegian bilateral aid to a selected country by agreement partner type or target area
+#'
+#' This function filters and aggregates Norwegian bilateral aid data (`data_bilateral`) for a single
+#' recipient country and groups the aid by a user-specified variable — either agreement partner type or target area.
+#' It returns a bar chart, top categories, and summary statistics for use in parameterized Quarto reports.
+#'
+#' @param data_bilateral A data frame of cleaned bilateral aid data, produced by run_pipeline()
+#' @param selected_country Character. Name of the recipient country (must match values in `recipient_country_en_visual`)
+#' @param group_var Character. Name of the grouping variable; must be either `"agreement_partner"` or `"target_area"`
+#' @param title Character. Title for the plot (default: `"Distribution"`)
+#' @param top_n Integer. Number of top categories to show before aggregating remainder into "Other" (default: `5`)
+#'
+#' @return A named list with:
+#' \describe{
+#'   \item{val_maxyear}{The latest year in `data_bilateral`}
+#'   \item{data_grouped}{A tibble of bilateral disbursements by group (with amounts and percentages)}
+#'   \item{p_barplot}{A `ggplot` bar chart of bilateral aid by group}
+#'   \item{val_top_labels}{A comma-separated summary of the top 3 groups, formatted with NOK values}
+#'   \item{val_prefix}{A short phrase, either `"most of"` or `""`, used in summary sentences}
+#' }
+#'
+#' @examples
+#' run_bilateral_aid(df_oda_ten, selected_country = "Uganda", group_var = "target_area")
+#' run_bilateral_aid(df_oda_ten, selected_country = "Malawi", group_var = "agreement_partner")
+#'
+#' @export
 
 run_bilateral_aid <- function(
     data_bilateral,

@@ -1,5 +1,3 @@
-library(dplyr)
-library(stringr)
 
 # ---- Function: Create URL to the country page in Resultatportalen ----
 
