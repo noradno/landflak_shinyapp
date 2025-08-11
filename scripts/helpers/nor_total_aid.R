@@ -95,7 +95,7 @@ run_nor_total_aid <- function(
       ) +
       theme(
         plot.title = element_text(size = 16),
-        axis.text.x = element_text(size = 9),
+        axis.text.x = element_text(size = 11),
         legend.position = "bottom",
         legend.title = element_blank(),
         legend.text = element_text(size = 11),
