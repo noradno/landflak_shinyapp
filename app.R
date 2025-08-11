@@ -41,8 +41,7 @@ ui <- page_sidebar(
       label = "Select country",
       choices = select_country
     ),
-    downloadButton("report", "Produce"),
-    add_busy_bar()
+    downloadButton("report", "Produce")
   ),
   card(style = "max-width: 1000px",
        card_header("Produce Country Snapshot Reports"),
@@ -83,6 +82,10 @@ server <- function(input, output) {
     content = function(file) {
       temp_dir <- tempdir()
       output_name <- "report.docx"
+      
+      # UI Block with a modal spinner
+      shinybusy::show_modal_spinner(spin = "hollow-dots", text = "Generating report")
+      on.exit(shinybusy::remove_modal_spinner(), add = TRUE)
       
       # Render the Quarto report in a temp dir
       tryCatch({
