@@ -105,14 +105,15 @@ run_partnerlist <- function(
       font(fontname = "Cambria", part = "all") |>
       fontsize(size = 9, part = "all") |>
       fontsize(size = 11, part = "header") |>
-      bold(part = "header", i = 1)
+      bold(part = "header", i = 1) |> 
+      bold(part = "body", i = nrow(data_flex))
   }
   
   # -- Extract top 3 labels and prefix --
   make_top3_text <- function(data_partnerlist, partner_col) {
     partner_col_str <- rlang::as_name(rlang::ensym(partner_col))
     
-    data_txt <- data_partnerlist |> filter(.data[[partner_col_str]] != "Total")
+    data_txt <- data_partnerlist |> filter(!.data[[partner_col_str]] %in% c("Total", "Other"))
     n_partners <- nrow(data_txt)
     
     val_top_labels <- data_txt |>

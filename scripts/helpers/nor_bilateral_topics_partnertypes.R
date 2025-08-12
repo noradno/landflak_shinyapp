@@ -34,7 +34,7 @@ run_bilateral_aid <- function(
 ) {
   # Helpers
   fmt_millnok <- function(x) {
-    scales::number(x, accuracy = 0.1, decimal.mark = ",", big.mark = " ")
+    scales::number(x, accuracy = 1, decimal.mark = ",", big.mark = " ")
   }
   
   group_sym <- rlang::sym(group_var)
@@ -86,7 +86,7 @@ run_bilateral_aid <- function(
       aes(label = paste0(
         fmt_millnok(mill_nok),
         if (!has_negative_prosent) {
-          paste0(" (", scales::percent(prosent, accuracy = 0.1, decimal.mark = ","), ")")
+          paste0(" (", scales::percent(prosent, accuracy = 1, decimal.mark = ","), ")")
         } else {
           ""
         }

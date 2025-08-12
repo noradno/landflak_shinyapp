@@ -57,7 +57,7 @@ int_total_aid <- run_int_total_aid(
 )
 ```
 
-**This country snapshot report provides a statistical overview of Norwegian development aid (ODA) to `r params$selected_country`.**
+**This country snapshot provides a statistical overview of Norwegian development aid (ODA) to `r params$selected_country`.**
 
 # International aid to `r params$selected_country`
 
@@ -93,9 +93,9 @@ result_portal_url <- run_result_portal_url(
 )
 ```
 
-In `r nor_total_aid$val_bilateral_maxyear`, Norway disbursed NOK `r nor_total_aid$val_bilateral_maxyear_sum` million in bilatearl aid to `r params$selected_country` through both bilateral and multilateral channels.[^1] In addition, Kenya received an estimated share of Norway's core support to multilateral organisations, but such figures for `r nor_total_aid$val_multilateral_maxyear` are not yet available.[^2]
+In `r nor_total_aid$val_bilateral_maxyear`, Norway disbursed NOK `r nor_total_aid$val_bilateral_maxyear_sum` million in bilateral aid to `r params$selected_country`.[^1] In addition, Kenya received an estimated share of Norway's core support to multilateral organisations, but such figures for `r nor_total_aid$val_bilateral_maxyear` are not yet available.[^2]
 
-[^1]: [Aidresults.no](`r result_portal_url`) provides detailed statistics on Norwegian bilateral aid to `r params$selected_country`.
+[^1]: The term *bilateral aid* refers to earmarked support to the recipient country provided through both bilateral and multilateral channels. [Aidresults.no](`r result_portal_url`) provides detailed statistics on Norwegian bilateral aid to `r params$selected_country`.
 
 [^2]: Estimated multilateral core support from Norway to `r params$selected_country` has been calculated by the OECD Development Co-operation Directorate (DCD). These estimates, referred to as *imputed multilateral ODA to countries* are based on how multilateral organisations allocate their core resources across recipient countries. Note that aid provided through regional and global programmes beyond multilateral core contributions is not included.
 
@@ -169,7 +169,7 @@ bilateral_partners <- run_partnerlist(
 )
 ```
 
-`r bilateral_partners$val_prefix` for bilateral aid to `r params$selected_country` in `r bilateral_partners$val_maxyear` were `r bilateral_partners$val_top_labels`.
+In `r bilateral_partners$val_maxyear`, `r bilateral_partners$val_prefix` the bilateral aid to `r params$selected_country` was directed to `r bilateral_partners$val_top_labels`.
 
 ```{r}
 #| label: print-table-partner
@@ -196,7 +196,7 @@ According to OECD estimates (*imputed multilateral ODA to countries*), `r params
 
 [^3]: Due to OECD rounding of values, there may be small discrepancies between the total estimated amount of multilateral core support to `r params$selected_country` in this table and the the figure shown in the table on the first page.
 
-The table below shows the distribution of this estimated core support by multilateral organisation in `r multilateral_partners$val_maxyear`.[^4] `r multilateral_partners$val_prefix` were `r multilateral_partners$val_top_labels`.
+The table below shows the distribution of this estimated core support by multilateral organisation.[^4] In `r multilateral_partners$val_maxyear`, `r bilateral_partners$val_prefix` estimated multilateral core support to `r params$selected_country` was channeled through `r multilateral_partners$val_top_labels`.
 
 [^4]: The table does not include imputed multilateral core support to `r params$selected_country` for all multilateral organisations receiving core support from Norway. However, the estimates include organisations that account for approximately 90 percent of total core contributions from DAC countries to multilateral organisations.
 
@@ -215,4 +215,4 @@ vec_today <- format(Sys.Date(), format="%d. %m. %Y")
 <br>
 <br>
 
-This country snapshot report was generated on `r vec_today` from the [Country Snapshot portal ](http://noradstats.shinyapps.io/country-snapshot/). For questions, please contact Norad's [Seksjon for Statistics and Analysis](mailto:norad-statistikk.og.analyse@norad.no).
+This country snapshot was generated on `r vec_today` from the [Country Snapshot portal ](http://noradstats.shinyapps.io/country-snapshot/). For questions, please contact Norad's [Seksjon for Statistics and Analysis](mailto:norad-statistikk.og.analyse@norad.no).

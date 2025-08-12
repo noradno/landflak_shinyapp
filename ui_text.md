@@ -4,7 +4,7 @@ Select a country to generate and download a country snapshot report in Microsoft
 
 ##### Content
 
-The country snapshot reports provide statistical overviews of development aid (ODA) to recipient countries. Each snapshot includes:
+The country snapshot provide statistical overviews of development aid (ODA) to recipient countries. Each snapshot includes:
 
 -   The largest OECD DAC donor countries of development aid to the recipient country
 
