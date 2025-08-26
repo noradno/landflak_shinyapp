@@ -1,66 +1,117 @@
-# Landflakportal - en applikasjon for nedlastning av landflak om bistand til enkeltland
+# Country Snapshot App
 
-### Funksjonalitet
+This Shiny app provides statistical country snapshots of Norwegian development aid (ODA) to developing countries. Users can select a recipient country from a dropdown menu, and a parametrized Quarto report is dynamically rendered as .docx and downloaded directly in the browser. Each report provides a summary of Norwegian aid to the selected country, based on the most recent available data from APIs, databases, and manually updated files.
 
--   En Shiny web app som genererer og laster ned parametriserte rapporter i word-format basert på valgt mottakerland. Appen viser både øremerket bistand til enkeltland fra Norge og andre DAC-land, og beregnet multilateral kjernestøtte fra Norge til enkeltland. Appen har dermed mer info enn hva som inngår i norsk offisiell bistandsstatistikk, og skal presentere bistanden i et kort flak.
--   Appen er for internt bruk og krever derfor brukernavn og passord.
--   Landflakene sammenstiller offisiell statistikk på øremerket bistand til enkeltland, fra Norge og andre medlemsland i OECDs utviklingskomite (DAC). I tillegg presenteres offisielle beregninger fra OECD på hvor mye av Norges multilaterale kjernestøtte som brukes på mottakerlandet. Landflakene dekker en tiårsperiode.
--   Bruker kan velge blant alle land som mottok øreemerket bistand ved forrige rapporteringsår.
--   Appen bygges med scriptet *app.R*, som spesifiserer både ui (front-end) og server (back-end).
--   Appen publiseres på en nettside på følgende URL: <https://noradstats.shinyapps.io/landflak/>. I tillegg er dev-portal og test-portal på følgende URL: <https://noradstats.shinyapps.io/landflak-dev/> <https://noradstats.shinyapps.io/landflak-test/>
--   Appen er versjonskontrollert, for å holde kontroll på versjon av R og pakkene.
+👉 Access the app at: <https://noradstats.shinyapps.io/country-snapshot>
 
-### Rutine ved oppdatering av datakilder
+## 🔄 Data Pipeline Overview
 
-1.  Oppdater datafilene i mappen data_raw_and_processed/raw. Slett gamle filversjoner, slik at det ikke er flere filer med samme navn.
-2.  Kjør scriptet *01_get_data_donors.R* for å hente data fra OECDs API på DAC-lands ODA til enkeltland. Lagres automatisk som csv i mappen data_raw_and_processed/processed. Husk å oppdater årstall for årgang i starten av scriptet for at nyeste data skal hentes.
-3.  Kjør scriptet *02_get_data_imputed.R* for å hente data fra OECDs API på Norsk beregnet imputert kjernestøtte til enkeltland. Lagres automatisk som csv i mappen data_raw_and_processed/processed. Husk å oppdater årstall for årgang i starten av scriptet for at nyeste data skal hentes.
-4.  Kjør scriptet *03_create_final_data.R* for å hente offisielle norsk bistandstatistikk for bistand til enkeltland og bearbeide alle datakilder til bruk i landflaket. Resultatet er 5 data frames som lagres i 1 rda-fil i mappen data_final.
-5.  Oppdater alle pakker og R-versjonen før opplasting til *shinyapps.io*. Viktig å av- og reinnstallere pakkene noradstats, noradplots og shinymanager (disse er installert fra Github) via *remotes::install_github("noradno/noradstats")*, *remotes::install_github("noradno/noradplot")* og *remotes::install_github("datastorm-open/shinymanager")*.
-6.  Kjør scriptet *app.R* for å teste at den fungerer med oppdaterte datasett.
-7.  Appen publiseres til *shinyapps.io* gjennom Rstudios *Publish the application or document* til følgende URL: <https://noradstats.shinyapps.io/landflak/>. Man velger hvilke filer som skal publiseres på shinyapps.io, og pass på at alle filer/mapper med viktig unntak av mappen data_raw_and_processed og eventuelle genererte word-dokumenter.
-8.  Vanlige feilkilder ved publisering:
-    -   Feil 1: Appen publiseres ikke: Appen publiseres ikke, dvs. man får en feilmelding når man går til <https://noradstats.shinyapps.io/landflak/>. Sjekk loggen for appen på shinyapps.io (noradstats@gmail.com er brukernavn). for å se hvor i koden det har gått galt. Typiske feil er at det er en pakke den ikke finner (og må legges inn med library(), eller at pakkene ikke er oppdaterte.
+A dedicated data pipeline retrieves, processes, and transforms data from multiple sources, producing the cleaned `.rds` files that power the app. The entry point to the pipeline is the function `run_pipeline()`.
 
-    -   Feil 2: Appen publiseres, slik at man kan logge inn i portalen, men når man genererer landflak, så får man ikke word-filer, men filer som heter "report.html" og beskjed om at det var mislykket. Denne feilen er vanskeligere å identifisere hva skyldes, fordi det ikke fremgår av loggen på shinyapps.io. En typisk feil er at fila word-template-filen ikke er blitt med i opplastingen til shinyapps.io.
+> ⚠️ **Before running the pipeline:** The `data/raw/` folder contains CSV files that must be manually updated. This includes:
+>
+> -   `imputed_multi_land_org.csv` (a main data source): A manually maintained dataset of Norwegian imputed multilateral aid, by organization and country.
+> -   `crs_donors_code.csv`, `crs_recipients_code.csv`, `exchangerate.csv`, and `land_og_regioner.csv` (helper files)
+>
+> For a complete guide to updating these files, see the section [📅 Manually Updating Input CSV Files](#📅-manually-updating-input-csv-files).
 
-### Beskrivelse av filer
+### How to Run
 
-#### Script-filer
+``` r
+# Optional: load required packages first
+renv::restore()
 
--   *app.R*: Scriptet bygger appen ved å spesifisere funksjonalitet i ui (front-end) og server (back-end):
+# Run the pipeline to prepare data for the app
+source("scripts/pipeline/run_pipeline.R")
+run_pipeline(last_year_donors = 2023, last_year_imputed = 2023, version = "statsys_official")
+```
 
-    -   ui (front-end): spesifiserer nettsiden inkl. brukerinput fra landliste (parameter) og action-button (*Generer landflak i Microsoft Word-format*).
-    -   server (back-end): kjører scriptet *landflak.Rmd* for valgte land (parameter) når bruker trykker action-button, og laster ned filen.
+### Main Steps: executed by `run_pipeline()`
 
--   *01_get_data_donors.R:* Script for hente donordata fra OECDs API. Må kjøres før appen kjøres (app.R). Øremerket bistand fra medlemsland i OECD DAC siste rapporteringsår, avgrenset til enkeltland som har mottatt øremerket bistand fra Norge. Kilde: OECDs statistikkdatabase (*DAC2a*).
+-   `get_data_donors(last_year)`: Fetches bilateral donor data for the specified year from the **OECD SDMX API**.
+-   `get_data_imputed(last_year)`: Fetches Norwegian imputed multilateral data for the last 10 years ending in the specified year from the **OECD SDMX API**.
+-   `get_data_bilateral(version)`: Extracts bilateral aid from **Norad's statsys database** (DuckDB) for the most recent 10 years.
+-   `get_data_imputed_org()`: Reads manually imputed multilateral aid by organization (one year only) from a **CSV file**.
+-   `create_final_data(df_dac_raw, df_imputed_raw, df_oda_ten, df_imp_org_raw)`: Final assembly step that merges, filters, and writes cleaned data files to `data/final/`.
 
--   *02_get_data_imputed.R:* Script for hente imputed-data fra OECDs API. Må kjøres før appen kjøres (app.R). Beregnet norsk multilateral kjernestøtte til mottakerland siste ti år, avgrenset til land som har mottatt øremerket bistand fra Norge de ti aktuelle årene Kilde: OECDs statistikkdatabase (*DAC2a*). Scriptet henter også vekslingskurs fra USD-NOK for å få norske beløp på beregningene.
+The pipeline saves the following `.rds` datasets to the `data/final/` folder:
 
--   *03_create_final_data.R*: Script for å hente offisiell norsk bistandstatistikk for bistand til enkeltland og bearbeide alle datakilder til bruk i landflaket. Scriptet inkluderer også landnavn-kolonnen *recipient_country_no_visual* i alle datafilene, som er de visuelle landnavnene tilsvarende i bistandsresultater.no. Resultatet er 5 data frames som lagres i 1 rda-fil i mappen data_final.
+-   `df_oda_ten.rds`
+-   `df_dac_raw.rds`
+-   `df_imp_raw.rds`
+-   `df_imp_org_raw.rds`
+-   `df_countries.rds`
 
--   *landflak.Rmd*: Scriptet genererer landflaket. Det er en parametrisert rapport i word-format med ett brukervalgt parameter: mottakerland. Scriptet kjøres i server-spesifiseringen i scriptet *app.R*, når bruker har valgt land og trykker på action button "Generer landflak i Microsoft Word-format" i appen.
+All of these are consumed directly by the Shiny app.
 
-#### Datafiler
-Til info: Grunnen til at data_raw_and_processd og data_final er i to separate mapper i project directory er at det er enklere å velge hvilke datafiler som skal inkluderes ved publisering til shinyapps.io, for kun filene i data_final skal deployes dit.
+### 🔁 Update Frequency
 
--   Datafiler legges inn i mappen data_raw_and_processed/raw. Datafilene dekker ulike tidsrom og er basert på ulike datakilder.
-    -   *land_og_regioner.csv*: Bro-tabell med visuelle landnavn tilsvarende bistandsresultater.no, for å kunne linke til aktuell landside i bistandsresultater. Kilde: *land_og_regioner.xlsx* fra siste datalast til *bistandsresultater.no*. Denne brukes også ved datalast til bistandsresultater.no, så bruk den samme fila her.
-    -   *exchangerate.csv*: Vekslingskurser USD-NOK tilgjengelig på excelfil hos OECD: [Development finance data - OECD](https://www.oecd.org/dac/financing-sustainable-development/development-finance-data/): <https://www.oecd.org/dac/financing-sustainable-development/development-finance-data/Exchange-rates.xls> Vi kan ikke bruke OECDs offisielle vekslingskurser i deres database-API, men istedet bruke bistandsrelevante vekslingskurser herfra som låses i april hvert år.
-    -   *crs_donors_code.csv*: En liste med to kolonner: crs_donors_code og iso_code. Vi trenger iso_code for donorland fordi iso_code brukes i OECDs APIer i scriptene 01_get_data_donors.R og 02_get_data_imputed.R. Datakilde er [OECDs kodeoversikt](https://web-archive.oecd.org/temp/2024-06-19/57753-dacandcrscodelists.htm) 
-    -   *crs_recipients_code.csv*: En liste med to kolonner: crs_recipients_code og iso_code. Vi trenger iso_code for mottakerland fordi iso_code brukes i OECDs APIer i scriptene 01_get_data_donors.R og 02_get_data_imputed.R. Datakilde er [OECDs kodeoversikt](https://web-archive.oecd.org/temp/2024-06-19/57753-dacandcrscodelists.htm) 
+The app should be updated whenever any of the underlying data sources are updated. In particular, the bilateral aid data retrieved by `get_data_bilateral()` should reflect the official data published at [aidresults.no](https://www.aidresults.no).
 
-#### Andre filer og mapper
+## 🗂️ Project Structure
 
--   *ui_tekst.md*: Tekst som beskriver portalen i front-end (ui). Sources inn i ui-spesifiseringen i scriptet *app.R*
+```         
+├── app.R                          # Main Shiny app launcher
+├── country_snapshot.qmd           # Parametrized Quarto report for selected country
+├── country_snapshot_output.docx   # Example output (optional)
+├── scripts/
+│   ├── helpers/                   # Functions used by Quarto report (plots, tables, formatting)
+│   ├── pipeline/                  # Data processing scripts: get_data_*(), create_final_data(), run_pipeline()
+│   └── setup/                     # Project-level setup scripts (e.g. load_packages.R)
+├── data/
+│   ├── raw/                       # Manually maintained input CSVs
+│   └── final/                     # Cleaned .rds files used by app and report
+├── template/                      # Word reference-docx for Norad styling
+├── www/                           # Static assets (e.g. Norad logo for login page)
+├── config.yml                     # Login credentials (gitignored)
+├── ui_text.md                     # Markdown content for app UI
+├── rsconnect/                     # Deployment metadata (auto-generated)
+├── renv/, renv.lock               # Dependency management
+├── README.md                      # This file
+└── landflak_shinyapp.Rproj        # RStudio project file
+```
 
--   *README.md*: en beskrivelsen av appens funksjonalitet og komponenter
+## ⚙️ Setup Instructions
 
--   *template/* (mappe): inneholder word-mal til landflaket:
+``` r
+# Restore project dependencies
+renv::restore()
 
-    -   *landflak_template_logo.docx*: en spesialtilpassed word-mal til landflak med norad-logo. Brukes i scriptet *landflak.Rmd*
+# Run the pipeline to prepare data for the app
+source("scripts/pipeline/run_pipeline.R")
+run_pipeline(last_year_donors = 2023, last_year_imputed = 2023, version = "statsys_official")
+```
 
--   *www/* (mappe): inneholder logoer i ulik størrelse:
+## 👤 Maintainer
 
-    -   *norad_logo_black_small_rgb.png*: brukes i scriptet *landflak.Rmd*
-    -   *norad_logo_black_small_rgb_micro.png*: brukes scriptet *app.R* front-end (både innlogging og på nettsiden).
+Developed and maintained by the Section for Statistics and Analysis, Norad.
+
+## ☁️ Deployment
+
+The app is published to [shinyapps.io](https://www.shinyapps.io) using the [`rsconnect`](https://rstudio.github.io/rsconnect/) package from **RStudio**. When ready, you can publish the app by clicking **"Publish"** in the RStudio IDE or using the deployment wizard.
+
+Deployment metadata is stored in the `rsconnect/` folder.
+
+👉 Live app: <https://noradstats.shinyapps.io/country-snapshot>
+
+## 🛠️ Troubleshooting Deployment
+
+-   **Deployment fails with an error**: Check the app logs at [shinyapps.io](https://www.shinyapps.io). This is often caused by outdated packages. Make sure to update packages—especially `noradstats` and `noradplot`—then run `renv::snapshot()` before re-deploying.
+
+-   **Deployment succeeds but report doesn't render correctly (e.g. renders `report.html`)**: This is typically due to a missing Word template. Ensure the file in `template/` is included when deploying. App logs at shinyapps.io may provide further clues.
+
+## 📅 Manually Updating Input CSV Files
+
+The following files in the `data/raw/` folder must be manually maintained and updated before running the pipeline:
+
+-   **`land_og_regioner.csv`**: Lookup table with friendly country names used for display (e.g. on [bistandsresultater.no](https://www.bistandsresultater.no)). Source: `land_og_regioner.xlsx` from the latest data load to bistandsresultater.no. Enables link creation to country pages.
+
+-   **`exchangerate.csv`**: Contains fixed USD-to-NOK exchange rates published by OECD annually in April. Source: [OECD Exchange Rates Excel file](https://www.oecd.org/dac/financing-sustainable-development/development-finance-data/Exchange-rates.xls). These rates are preferred over the default API rates.
+
+-   **`crs_donors_code.csv`**: Two-column file mapping `crs_donors_code` to `iso_code`. Required for querying OECD APIs in `get_data_donors()` and `get_data_imputed()`. Source: [OECD CRS/DAC Code Lists](https://web-archive.oecd.org/temp/2024-06-19/57753-dacandcrscodelists.htm)
+
+-   **`crs_recipients_code.csv`**: Similar structure as above, mapping `crs_recipients_code` to `iso_code`. Also used in OECD queries. Source: [OECD CRS/DAC Code Lists](https://web-archive.oecd.org/temp/2024-06-19/57753-dacandcrscodelists.htm)
+
+-   **`imputed_multi_land_org.csv`** (**main data source**): A manually maintained dataset of Norwegian imputed multilateral aid, by organization and country. Must reflect the latest available year.
+
+Be sure to keep these files up to date and aligned with the latest official data before executing `run_pipeline()`.

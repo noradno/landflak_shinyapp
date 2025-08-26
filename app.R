@@ -1,17 +1,14 @@
-# Shiny web app for å generere og laste ned parametriserte landflak i wordformat ----
-# Skrevet av Einar Tornes
-# Appen publseres via Rstudio desktop eller Rstudio Cloaud til shinyapps.io-serveren: https://noradstats.shinyapps.io/landflak/
+# Shiny app for generating and downloading Quarto-based country snapshot reports (Word format) ----
+# 
+# Production app URL: https://noradstats.shinyapps.io/country-snapshot
+# Development app URL: https://noradstats.shinyapps.io/country-snapshot-dev
+#
+# Before deploying the app:
+# - Follow steps in README.md to update data sources
+# - Ensure the Word template is present in the /template/ folder
+# - Quarto CLI must be installed and available on system PATH
 
-# Appens server kjører scriptet landflak.Rmd når bruker har valgt landparameter på nettsiden (ui)
-
-# Pakken noradstats og noradplot må reinstalleres ved ny last til shinyapps.io: remotes::install_github("noradno/noradstats") og remotes::install_github("noradno/noradplot")
-# Husk at alle filer skal inkluderes (inkl. word-template) når appen publiseres til shinyapps.io
-
-
-# Før appen kjøres: last ned datakilder med separat script: get_data.R ---
-# Scriptet get_data laster ned datafiler til mappen data/
-
-# Laster inn pakker ----
+# Load packages ----
 library(shiny)
 library(shinybusy)
 library(shinymanager)
@@ -19,110 +16,96 @@ library(shinythemes)
 library(dplyr)
 library(markdown)
 library(config)
+library(bslib)
+library(quarto)
+library(withr)
+library(here)
+library(readr)
 
-# Laster inn data i global environment ved å source scriptet import_data.R ---
-load(here::here("data_final", "landflak_datasets.rda"))
+# Load list of available countries used in dropdown menu
+df_countries <- read_rds(here("data", "final", "df_countries.rds"))
 
-# Country list for user input
-select_country <- df_oda_ten |>
-  filter(income_category != "Unspecified") |>
-  filter(year == max(year)) |>
-  group_by(recipient_country_no_visual) |>
-  summarise(total = sum(disbursed_mill_nok)) |>
-  ungroup() |>
-  filter(total > 0) |>
-  filter(!is.na(recipient_country_no_visual)) |>
-  select(recipient_country_no_visual) |>
-  arrange() |>
+select_country <- df_countries |> 
+  select(recipient_country_en_visual) |> 
   pull()
 
-# Shiny app ----
+# Shiny UI ----
+ui <- page_sidebar(
+  title = "Country Snapshot Reports",
+  sidebar = sidebar(
+    title = NULL,
+    open = "always",
+    width = "300px",
+    selectInput(
+      "select_country", 
+      label = "Select country",
+      choices = select_country
+    ),
+    downloadButton("report", "Produce")
+  ),
+  card(style = "max-width: 1000px",
+       card_header("Produce Country Snapshot Reports"),
+       includeMarkdown("ui_text.md")
+  )
+)
 
-# Spesifiserer frontend ----
-ui <-
-    fluidPage(
-        
-        # Tema
-        #theme = shinythemes::shinytheme("cerulean"),
-        
-        # Overskrift
-        titlePanel(title = "Landflak - bistand til enkeltland"),
-        
-        # Landvalg i nedtrekksmeny
-        fluidRow(
-            column(6, # kolonnebredde (6 er halv skjermbredde)
-            selectInput("select_country",
-                        label = "Velg land",
-                        choices = select_country),
-            
-            # Nedlastingsknapp
-            downloadButton("report", "Generer landflak i Microsoft Word-format"),
-            
-            # Animasjon når serveren jobber
-            add_busy_spinner(spin = "semipolar", position = "full-page")
-            )),
-        
-        # Tekstomtale
-        fluidRow(
-            column(12, # kolonnebredde (6 er halv skjermbredde)
-                   p(), br(),
-                   includeMarkdown("ui_tekst.md"), # Tekstfil med info til brukere
-                   p(), br(),
-                   img(src = "norad_logo_black_small_rgb_micro.png")
-            )
-        )
-    )
-
-# Innlogging med brukernavn og passord: wrapper ui i secure_app()
+# Secure login wrapper
 ui <- secure_app(ui,
                  theme = "cerulean",
-                 set_labels(
-                   language = "en",
-                   "Login" = "Logg inn",
-                   "Please authenticate" = "Vennligst logg inn",
-                   "Username:" = "Brukernavn",
-                   "Password:" = "Passord"),
+                 set_labels(language = "en"),
                  tags_bottom = tags$div(
-                   tags$p("Ved spørsmål om innlogging, kontakt ",
+                   tags$p("For questions, please contact ",
                           tags$a(
                             href = "mailto:norad-statistikk.og.analyse@norad.no",
-                            target="_top", "Seksjon for Statistikk og analyse")),
+                            target="_top", "Norad's Section for Statistics and Analysis")),
                    tags$img(src = "norad_logo_black_small_rgb_micro.png")
-                   )
                  )
+)
 
-# Spesifiserer backend ----
+# Shiny Server ----
 server <- function(input, output) {
-    
-    # Passordbeskyttelse: Sjekker credentials for å godkjenne innlogging
-    res_auth <- secure_server(
-      check_credentials = check_credentials(data.frame(
-        user = config::get("credentials")$user,
-        password = config::get("credentials")$password,
-        stringsAsFactors = FALSE))
-    )
-    
-    output$report <- downloadHandler(
+  
+  # Authenticate user
+  res_auth <- secure_server(
+    check_credentials = check_credentials(data.frame(
+      user = config::get("credentials")$user,
+      password = config::get("credentials")$password,
+      stringsAsFactors = FALSE
+    ))
+  )
+  
+  # Report rendering and download
+  output$report <- downloadHandler(
+    filename = function() {
+      paste0(input$select_country, "-snapshot.docx")
+    },
+    content = function(file) {
+      temp_dir <- tempdir()
+      output_name <- "report.docx"
+      
+      # UI Block with a modal spinner
+      shinybusy::show_modal_spinner(spin = "hollow-dots", text = "Generating report")
+      on.exit(shinybusy::remove_modal_spinner(), add = TRUE)
+      
+      # Render the Quarto report in a temp dir
+      tryCatch({
+        withr::with_dir(temp_dir, {
+          system2("quarto", c(
+            "render", here::here("country_snapshot.qmd"),
+            "--output", output_name,
+            "--execute-param", paste0("selected_country=", shQuote(input$select_country))
+          ))
+        })
         
-        # Lager docx-output med filnavn på valgte land
-        filename = renderText({
-            paste0(input$select_country, "_landflak.docx")
-        }),
-        content = function(file) {
-            # Set up parameters to pass to Rmd document
-            params <- list(land = input$select_country)
-            
-            # Knit the document, passing in the `params` list, and eval it in a
-            # child of the global environment
-            rmarkdown::render(
-                "landflak.Rmd",
-                output_file = file,
-                params = params,
-                envir = new.env(parent = globalenv())
-            )
-        }
-    )
+        file.copy(file.path(temp_dir, output_name), file, overwrite = TRUE)
+        
+      }, error = function(e) {
+        showNotification("Failed to generate report. Check template and logs.", type = "error")
+        stop(e)
+      })
+    }
+  )
 }
 
-# Bygg app
+# Launch app ----
 shinyApp(ui, server)

@@ -2,8 +2,12 @@
 config.yml
 *.csv
 *.rda
+*.rds
 landflak.docx
 landflak_en.docx
+
+# Rsconnect
+*.dcf
 
 # History files
 .Rhistory
