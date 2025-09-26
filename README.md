@@ -2,7 +2,7 @@
 
 This Shiny app provides statistical country snapshots of Norwegian development aid (ODA) to developing countries. Users can select a recipient country from a dropdown menu, and a parametrized Quarto report is dynamically rendered as .docx and downloaded directly in the browser. Each report provides a summary of Norwegian aid to the selected country, based on the most recent available data from APIs, databases, and manually updated files.
 
-👉 Access the app at: <https://noradstats.shinyapps.io/country-snapshot>
+👉 Access the app at: [https://noradstats.shinyapps.io/](https://noradstats.shinyapps.io/country-snapshot){.uri}[landflak](https://noradstats.shinyapps.io/landflak/)
 
 ## 🔄 Data Pipeline Overview
 
