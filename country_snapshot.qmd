@@ -93,7 +93,7 @@ result_portal_url <- run_result_portal_url(
 )
 ```
 
-In `r nor_total_aid$val_bilateral_maxyear`, Norway disbursed NOK `r nor_total_aid$val_bilateral_maxyear_sum` million in bilateral aid to `r params$selected_country`.[^1] In addition, `r params$selected_country` received an estimated share of Norway's core support to multilateral organisations, but such figures for `r nor_total_aid$val_bilateral_maxyear` are not yet available.[^2]
+In `r nor_total_aid$val_bilateral_maxyear`, Norway disbursed NOK `r nor_total_aid$val_bilateral_maxyear_sum` million in bilateral aid to `r params$selected_country`.[^1] In addition, `r params$selected_country` received an estimated NOK `r nor_total_aid$val_multilateral_maxyear_sum` as its share of Norway’s core contributions to multilateral organisations.[^2] <!-- but such figures for `r nor_total_aid$val_bilateral_maxyear` are not yet available. -->
 
 [^1]: The term *bilateral aid* refers to earmarked support to the recipient country provided through both bilateral and multilateral channels. [Aidresults.no](`r result_portal_url`) provides detailed statistics on Norwegian bilateral aid to `r params$selected_country`.
 
